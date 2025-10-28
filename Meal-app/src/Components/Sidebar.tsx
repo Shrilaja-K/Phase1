@@ -1,0 +1,45 @@
+import React, { Component } from 'react';
+import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import LoginIcon from '@mui/icons-material/Login';
+import CategoryIcon from '@mui/icons-material/Category';
+import SearchIcon from '@mui/icons-material/Search';
+import { withRouter } from './withRouter'; 
+
+class Sidebar extends Component {
+  render() {
+    const { open, toggleDrawer } = this.props; 
+    const menuItems = [
+      { text: 'Home', icon: <HomeIcon />, path: '/' },
+      { text: 'Login', icon: <LoginIcon />, path: '/login' },
+      { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
+      { text: 'Search', icon: <SearchIcon />, path: '/search' },
+    ];
+
+    return (
+      <Drawer
+        
+        open={open}
+        onClose={toggleDrawer(false)}
+      >
+       
+        <List sx={{ width: 250, bgcolor: '#3D4127', color: '#fff', height: '100%' }}>
+          {menuItems.map((item) => (
+            <ListItemButton
+              key={item.text}
+              onClick={() => {
+                this.props.navigate(item.path);
+                toggleDrawer(false)(); 
+              }}
+            >
+              <ListItemIcon sx={{ color: '#fff' }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
+    );
+  }
+}
+
+export default withRouter(Sidebar);

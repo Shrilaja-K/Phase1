@@ -7,7 +7,7 @@ export default class Imagemovement extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      meals: [],
+      meals: [],  
       currentIndex: 0,
     };
   }
