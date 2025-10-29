@@ -1,15 +1,13 @@
-
 import React, { Component } from 'react';
 import {
   Box,
   Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button,
   Grid,
   Typography,
+  Pagination,
+  TextField,
+  Autocomplete,
 } from '@mui/material';
 import { withRouter } from './withRouter';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -27,6 +25,8 @@ class FilterPage extends Component {
     selectedArea: '',
     selectedIngredient: '',
     meals: [],
+    currentPage: 1,
+    lastFilters: null, // Track last applied filters
   };
 
   async componentDidMount() {
@@ -44,19 +44,35 @@ class FilterPage extends Component {
       ]);
 
       this.setState({
-        categories: categoriesData.meals,
-        areas: areasData.meals,
-        ingredients: ingredientsData.meals,
+        categories: categoriesData.meals.map((c) => c.strCategory),
+        areas: areasData.meals.map((a) => a.strArea),
+        ingredients: ingredientsData.meals.map((i) => i.strIngredient),
       });
     } catch (error) {
       console.error(error);
     }
   }
 
-  handleChange = (e) => this.setState({ [e.target.name]: e.target.value });
-
   handleFilter = async () => {
-    const { selectedCategory, selectedArea, selectedIngredient } = this.state;
+    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
+
+    // Check if filters are unchanged
+    const currentFilters = {
+      category: selectedCategory,
+      area: selectedArea,
+      ingredient: selectedIngredient,
+    };
+
+    if (
+      lastFilters &&
+      lastFilters.category === currentFilters.category &&
+      lastFilters.area === currentFilters.area &&
+      lastFilters.ingredient === currentFilters.ingredient
+    ) {
+      // Filters haven't changed, no need to refetch
+      return;
+    }
+
     let url = 'https://www.themealdb.com/api/json/v1/1/filter.php?';
     if (selectedCategory) url += `c=${selectedCategory}&`;
     if (selectedArea) url += `a=${selectedArea}&`;
@@ -66,11 +82,19 @@ class FilterPage extends Component {
     try {
       const res = await fetch(url);
       const data = await res.json();
-      this.setState({ meals: data.meals || [] });
+      this.setState({
+        meals: data.meals || [],
+        currentPage: 1,
+        lastFilters: currentFilters, // store the applied filters
+      });
     } catch (error) {
       console.error(error);
-      this.setState({ meals: [] });
+      this.setState({ meals: [], currentPage: 1, lastFilters: currentFilters });
     }
+  };
+
+  handlePageChange = (_event, value) => {
+    this.setState({ currentPage: value });
   };
 
   render() {
@@ -82,7 +106,14 @@ class FilterPage extends Component {
       selectedArea,
       selectedIngredient,
       meals,
+      currentPage,
     } = this.state;
+
+    const mealsPerPage = 6;
+    const totalPages = Math.ceil(meals.length / mealsPerPage) || 1;
+    const indexOfLastMeal = currentPage * mealsPerPage;
+    const indexOfFirstMeal = indexOfLastMeal - mealsPerPage;
+    const currentMeals = meals.slice(indexOfFirstMeal, indexOfLastMeal);
 
     return (
       <Box
@@ -92,16 +123,26 @@ class FilterPage extends Component {
           minHeight: '100vh',
           width: '100%',
           backgroundColor: '#f5f5f5',
-          overflowX:'hidden',
-          overflowY: 'hidden'
+          overflowX: 'hidden',
+          overflow: 'hidden',
+          overflowY:'hidden'
         }}
       >
         <Box sx={{ height: `${APPBAR_HEIGHT}px` }} />
 
-        <Box sx={{ width: '100%', maxWidth: 600, mt: 2, mx: 'auto', px: 2 }}>
+        {/* Filters */}
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: 600,
+            mt: 2,
+            mx: 'auto',
+            px: { xs: 0, sm: 2 }, // remove gap on mobile
+          }}
+        >
           <Paper
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               display: 'flex',
               flexWrap: 'wrap',
               gap: 2,
@@ -112,62 +153,65 @@ class FilterPage extends Component {
               borderRadius: 0,
             }}
           >
-            <FormControl sx={{ minWidth: 180, flex: 1 }}>
-              <InputLabel>
-                <CategoryIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Category
-              </InputLabel>
-              <Select
-                name="selectedCategory"
-                value={selectedCategory}
-                onChange={this.handleChange}
-              >
-                <MenuItem value="">All</MenuItem>
-                {categories.map((cat) => (
-                  <MenuItem key={cat.strCategory} value={cat.strCategory}>
-                    {cat.strCategory}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={categories}
+              value={selectedCategory}
+              onChange={(_e, newValue) =>
+                this.setState({ selectedCategory: newValue || '' })
+              }
+              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={
+                    <>
+                      <CategoryIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                      Category
+                    </>
+                  }
+                />
+              )}
+            />
 
-            <FormControl sx={{ minWidth: 180, flex: 1 }}>
-              <InputLabel>
-                <PublicIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Area
-              </InputLabel>
-              <Select
-                name="selectedArea"
-                value={selectedArea}
-                onChange={this.handleChange}
-              >
-                <MenuItem value="">All</MenuItem>
-                {areas.map((area) => (
-                  <MenuItem key={area.strArea} value={area.strArea}>
-                    {area.strArea}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={areas}
+              value={selectedArea}
+              onChange={(_e, newValue) =>
+                this.setState({ selectedArea: newValue || '' })
+              }
+              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={
+                    <>
+                      <PublicIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                      Area
+                    </>
+                  }
+                />
+              )}
+            />
 
-            <FormControl sx={{ minWidth: 180, flex: 1 }}>
-              <InputLabel>
-                <RestaurantIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Ingredient
-              </InputLabel>
-              <Select
-                name="selectedIngredient"
-                value={selectedIngredient}
-                onChange={this.handleChange}
-              >
-                <MenuItem value="">All</MenuItem>
-                {ingredients.map((ing) => (
-                  <MenuItem key={ing.strIngredient} value={ing.strIngredient}>
-                    {ing.strIngredient}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={ingredients}
+              value={selectedIngredient}
+              onChange={(_e, newValue) =>
+                this.setState({ selectedIngredient: newValue || '' })
+              }
+              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={
+                    <>
+                      <RestaurantIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                      Ingredient
+                    </>
+                  }
+                />
+              )}
+            />
 
             <Button
               variant="contained"
@@ -176,6 +220,7 @@ class FilterPage extends Component {
                 color: '#fff',
                 minHeight: '56px',
                 px: 5,
+                flex: { xs: '1 1 100%', sm: 'auto' },
                 '&:hover': { backgroundColor: '#50bb69ff' },
               }}
               onClick={this.handleFilter}
@@ -185,59 +230,110 @@ class FilterPage extends Component {
           </Paper>
         </Box>
 
+        {/* Meals Grid */}
         <Box sx={{ flexGrow: 1, width: '100vw', mt: 6, mx: 0 }}>
-          <Box sx={{ width: '100%' }}>
-            {meals.length === 0 ? (
-              <Typography
-                sx={{ textAlign: 'center', color: '#777', fontSize: 18, mt: 4 }}
+          {meals.length === 0 ? (
+            <Typography
+              sx={{ textAlign: 'center', color: '#777', fontSize: 18, mt: 4 }}
+            >
+              No meals to show. Use the filter above.
+            </Typography>
+          ) : (
+            <>
+              <Grid
+                container
+                spacing={3}
+                justifyContent="center"
+                sx={{
+                  width: '100%',
+                  mx: 'auto',
+                  boxSizing: 'border-box',
+                  mb: 4,
+                }}
               >
-                No meals to show. Use the filter above.
-              </Typography>
-            ) : (
-              <Grid container spacing={3} justifyContent="center">
-                {meals.map((meal) => (
-                  <Grid item xs={12} sm={6} md={4} key={meal.idMeal}>
+                {currentMeals.map((meal) => (
+                  <Grid
+                    item
+                    key={meal.idMeal}
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    sx={{ display: 'flex', justifyContent: 'center' }}
+                  >
                     <Paper
                       onClick={() =>
                         this.props.navigate(`/recipe/${meal.idMeal}`)
                       }
                       sx={{
-                        p: 2,
-                        textAlign: 'center',
-                        borderRadius: 2,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                         width: '100%',
-                        maxWidth: 350,
-                        mx: 'auto',
+                        maxWidth: 360,
+                        aspectRatio: '1 / 1',
+                        display: 'flex',
+                        flexDirection: 'column',
                         cursor: 'pointer',
-                        transition: '0.3s',
+                        textAlign: 'center',
+                        overflow: 'hidden',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transition: '0.2s',
                         '&:hover': {
-                          boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
                           transform: 'scale(1.03)',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                         },
                       }}
                     >
-                      <img
+                      <Box
+                        component="img"
                         src={meal.strMealThumb}
                         alt={meal.strMeal}
-                        style={{
+                        sx={{
                           width: '100%',
-                          height: 'auto',
+                          height: '70%',
                           objectFit: 'cover',
-                          borderRadius: '8px',
-                          display: 'block',
-                          margin: '0 auto',
                         }}
                       />
-                      <Typography sx={{ mt: 1, fontWeight: 500 }}>
-                        {meal.strMeal}
-                      </Typography>
+                      <Box
+                        sx={{
+                          flexGrow: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f9f9f9',
+                          p: 1,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontWeight: 500,
+                            color: '#3D4127',
+                            textAlign: 'center',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            width: '90%',
+                          }}
+                        >
+                          {meal.strMeal}
+                        </Typography>
+                      </Box>
                     </Paper>
                   </Grid>
                 ))}
               </Grid>
-            )}
-          </Box>
+
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 4 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={this.handlePageChange}
+                    color="primary"
+                    shape="rounded"
+                    size="medium"
+                  />
+                </Box>
+              )}
+            </>
+          )}
         </Box>
       </Box>
     );

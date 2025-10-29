@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Box, Typography, IconButton, Paper } from '@mui/material';
+import { Box, Typography, IconButton, Paper, CircularProgress } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { withRouter } from './withRouter';
 
-export default class ImageMovement extends Component {
+class ImageMovement extends Component<any, any> {
   state = {
     meals: [],
     currentIndex: 0,
@@ -17,16 +18,16 @@ export default class ImageMovement extends Component {
     clearInterval(this.autoSlide);
   }
 
-  fetchMeals = async (count) => {
+  fetchMeals = async (count: number) => {
     const meals = [];
     for (let i = 0; i < count; i++) {
       const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
       const data = await res.json();
       meals.push(data.meals[0]);
     }
-    this.setState({ meals });
-
-    this.autoSlide = setInterval(this.handleNext, 3000);
+    this.setState({ meals }, () => {
+      this.autoSlide = setInterval(this.handleNext, 3000);
+    });
   };
 
   handlePrev = () => {
@@ -41,10 +42,20 @@ export default class ImageMovement extends Component {
     }));
   };
 
+  handleClickMeal = (id: string) => {
+    this.props.navigate(`/recipe/${id}`);
+  };
+
   render() {
     const { meals, currentIndex } = this.state;
 
-    if (!meals.length) return <Typography>Loading...</Typography>;
+    if (!meals.length) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 500 }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
 
     const meal = meals[currentIndex];
 
@@ -54,41 +65,37 @@ export default class ImageMovement extends Component {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          maxWidth: '100  %',
-          width:'100%',
+          maxWidth: '100%',
+          width: '100%',
           mx: 'auto',
           pb: 5,
-          overflowX:'hidden',
+          overflowX: 'hidden',
           overflowY: 'hidden',
-          flexDirection:'row',
-          flexWrap:'nowrap',
+          flexDirection: 'row',
+          flexWrap: 'nowrap',
           height: { xs: 'auto', md: 500 },
         }}
       >
-        <IconButton onClick={this.handlePrev} sx={{ mb: { xs: 2, md: 0 }, flexShrink: 0 }}>
+        <IconButton onClick={this.handlePrev}>
           <ArrowBackIosIcon />
         </IconButton>
 
         <Box
+          onClick={() => this.handleClickMeal(meal.idMeal)} // <-- Redirect on click
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' }, 
+            flexDirection: { xs: 'column', md: 'row' },
             flexGrow: 1,
             mx: 2,
             p: 2,
             borderRadius: 2,
             bgcolor: '#D4DE95',
             width: '100%',
+            cursor: 'pointer', // show clickable cursor
             alignItems: 'center',
           }}
         >
-          <Box
-            sx={{
-              flex: { xs: '0 0 100%', md: '0 0 40%' },
-              height: { xs: 250, md: '100%' },
-              mb: { xs: 2, md: 0 },
-            }}
-          >
+          <Box sx={{ flex: { xs: '0 0 100%', md: '0 0 40%' }, height: { xs: 250, md: '100%' }, mb: { xs: 2, md: 0 } }}>
             <img
               src={meal.strMealThumb}
               alt={meal.strMeal}
@@ -98,61 +105,28 @@ export default class ImageMovement extends Component {
                 objectFit: 'cover',
                 borderRadius: 12,
                 boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-                flex: { xs: '0 0 100%', md: '0 0 40%' }
               }}
             />
           </Box>
 
-          <Box
-            sx={{
-              flex: { xs: '1 1 100%', md: '1 1 60%' },
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              px: { xs: 2, md: 3 },
-              width: '100%',
-            }}
-          >
-            <Paper
-              elevation={6}
-              sx={{
-                p: { xs: 2, md: 3 },
-                bgcolor: 'rgba(255,255,255,0.85)',
-                borderRadius: 3,
-                maxWidth: 400,
-                width:'100%'
-              }}
-            >
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  letterSpacing: 1,
-                  lineHeight: 1.4,
-                  fontSize: { xs: 18, md: 22 },
-                }}
-              >
+          <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 60%' }, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', px: { xs: 2, md: 3 }, width: '100%' }}>
+            <Paper elevation={6} sx={{ p: { xs: 2, md: 3 }, bgcolor: 'rgba(255,255,255,0.85)', borderRadius: 3, maxWidth: 400, width: '100%' }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, letterSpacing: 1, lineHeight: 1.4, fontSize: { xs: 18, md: 22 } }}>
                 {meal.strMeal}
               </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: 14, md: 16 },
-                  lineHeight: 1.6,
-                  color: '#333',
-                }}
-              >
+              <Typography sx={{ fontSize: { xs: 14, md: 16 }, lineHeight: 1.6, color: '#333' }}>
                 {meal.strInstructions?.slice(0, 150)}...
               </Typography>
             </Paper>
           </Box>
         </Box>
 
-        <IconButton onClick={this.handleNext} sx={{ mt: { xs: 2, md: 0 } , flexShrink: 0}}>
+        <IconButton onClick={this.handleNext}>
           <ArrowForwardIosIcon />
         </IconButton>
       </Box>
     );
   }
 }
+
+export default withRouter(ImageMovement);
