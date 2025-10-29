@@ -6,11 +6,13 @@ export default class VideoSection extends Component {
     return (
       <Box
         sx={{
-          mt: 5,
+          mt: 15,
           position: 'relative',
           width: '100%',
-          height: '60vh', 
-          overflow: 'hidden',
+          height: { xs: '40vh', sm: '50vh', md: '60vh' },
+          overflowX: 'hidden',
+          overflow:'hidden',
+          overflowY: 'hidden',
           mb:5
         }}
       >
@@ -20,6 +22,9 @@ export default class VideoSection extends Component {
             justifyContent: 'center',
             alignItems: 'center',
             height: '100%',
+            width:'100%',
+            maxWidth:'100%',
+            overflow:'hidden'
           }}
         >
           <video
@@ -30,8 +35,9 @@ export default class VideoSection extends Component {
             style={{
               width: '100%',
               height: 'auto',
-              objectFit: 'cover',
-              borderRadius: '12px', 
+              objectFit: 'cover', 
+              maxWidth:'100%',
+              display:'block'
             }}
           >
             <source src="/Foodvideo.mp4" type="video/mp4" />
@@ -55,10 +61,10 @@ export default class VideoSection extends Component {
             
           }}
         >
-          <Typography variant="h3" sx={{ fontWeight: 600 }}>
+          <Typography variant="h3" sx={{ fontWeight: 600 ,fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' }}}>
             Discover Delicious Meals Worldwide
           </Typography>
-          <Typography variant="h6" sx={{ mt: 2 }}>
+          <Typography variant="h6" sx={{ mt: 2 ,fontSize: { xs: '0.9rem', sm: '1.2rem', md: '1.5rem' },}}>
             Explore thousands of recipes and find your next favorite dish!
           </Typography>
         </Box>
