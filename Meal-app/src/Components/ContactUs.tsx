@@ -19,7 +19,6 @@ class ContactUs extends Component {
       alert('Please fill all fields');
       return;
     }
-    // Here you can add your API call to submit the form
     console.log('Form Submitted:', this.state);
     alert('Thank you for contacting us!');
     this.setState({ name: '', email: '', message: '' });

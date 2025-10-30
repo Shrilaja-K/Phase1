@@ -9,9 +9,8 @@ class Footer extends Component {
         sx={{
           width: '100%',
           py: 4,
-          backgroundColor: '#3D4127', // Dark green/brown
+          backgroundColor: '#3D4127',
           color: '#fff',
-          mt: 8, // space above footer
         }}
       >
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>

@@ -8,15 +8,18 @@ import {
   Pagination,
   TextField,
   Autocomplete,
+  IconButton,
 } from '@mui/material';
 import { withRouter } from './withRouter';
 import CategoryIcon from '@mui/icons-material/Category';
 import PublicIcon from '@mui/icons-material/Public';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 
+
+
 const APPBAR_HEIGHT = 80;
 
-class FilterPage extends Component {
+class FilterPage extends Component<any> {
   state = {
     categories: [],
     areas: [],
@@ -26,7 +29,8 @@ class FilterPage extends Component {
     selectedIngredient: '',
     meals: [],
     currentPage: 1,
-    lastFilters: null, // Track last applied filters
+    lastFilters: null as any,
+    
   };
 
   async componentDidMount() {
@@ -44,9 +48,9 @@ class FilterPage extends Component {
       ]);
 
       this.setState({
-        categories: categoriesData.meals.map((c) => c.strCategory),
-        areas: areasData.meals.map((a) => a.strArea),
-        ingredients: ingredientsData.meals.map((i) => i.strIngredient),
+        categories: categoriesData.meals.map((c: any) => c.strCategory),
+        areas: areasData.meals.map((a: any) => a.strArea),
+        ingredients: ingredientsData.meals.map((i: any) => i.strIngredient),
       });
     } catch (error) {
       console.error(error);
@@ -54,9 +58,9 @@ class FilterPage extends Component {
   }
 
   handleFilter = async () => {
-    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
+    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } =
+      this.state;
 
-    // Check if filters are unchanged
     const currentFilters = {
       category: selectedCategory,
       area: selectedArea,
@@ -69,7 +73,6 @@ class FilterPage extends Component {
       lastFilters.area === currentFilters.area &&
       lastFilters.ingredient === currentFilters.ingredient
     ) {
-      // Filters haven't changed, no need to refetch
       return;
     }
 
@@ -85,7 +88,7 @@ class FilterPage extends Component {
       this.setState({
         meals: data.meals || [],
         currentPage: 1,
-        lastFilters: currentFilters, // store the applied filters
+        lastFilters: currentFilters,
       });
     } catch (error) {
       console.error(error);
@@ -93,9 +96,11 @@ class FilterPage extends Component {
     }
   };
 
-  handlePageChange = (_event, value) => {
+  handlePageChange = (_event: any, value: number) => {
     this.setState({ currentPage: value });
   };
+
+  
 
   render() {
     const {
@@ -107,6 +112,7 @@ class FilterPage extends Component {
       selectedIngredient,
       meals,
       currentPage,
+      
     } = this.state;
 
     const mealsPerPage = 6;
@@ -122,22 +128,20 @@ class FilterPage extends Component {
           flexDirection: 'column',
           minHeight: '100vh',
           width: '100%',
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#D4DE95',
           overflowX: 'hidden',
-          overflow: 'hidden',
-          overflowY:'hidden'
         }}
       >
         <Box sx={{ height: `${APPBAR_HEIGHT}px` }} />
 
-        {/* Filters */}
+       
         <Box
           sx={{
             width: '100%',
             maxWidth: 600,
             mt: 2,
             mx: 'auto',
-            px: { xs: 0, sm: 2 }, // remove gap on mobile
+            px: { xs: 0, sm: 2 },
           }}
         >
           <Paper
@@ -221,7 +225,7 @@ class FilterPage extends Component {
                 minHeight: '56px',
                 px: 5,
                 flex: { xs: '1 1 100%', sm: 'auto' },
-                '&:hover': { backgroundColor: '#50bb69ff' },
+                '&:hover': { backgroundColor: '#2d5536ff' },
               }}
               onClick={this.handleFilter}
             >
@@ -230,7 +234,7 @@ class FilterPage extends Component {
           </Paper>
         </Box>
 
-        {/* Meals Grid */}
+    
         <Box sx={{ flexGrow: 1, width: '100vw', mt: 6, mx: 0 }}>
           {meals.length === 0 ? (
             <Typography
@@ -251,7 +255,7 @@ class FilterPage extends Component {
                   mb: 4,
                 }}
               >
-                {currentMeals.map((meal) => (
+                {currentMeals.map((meal: any) => (
                   <Grid
                     item
                     key={meal.idMeal}
@@ -275,12 +279,16 @@ class FilterPage extends Component {
                         overflow: 'hidden',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                         transition: '0.2s',
+                        position: 'relative',
                         '&:hover': {
                           transform: 'scale(1.03)',
                           boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                         },
                       }}
                     >
+                      
+                      
+
                       <Box
                         component="img"
                         src={meal.strMealThumb}
@@ -321,7 +329,14 @@ class FilterPage extends Component {
               </Grid>
 
               {totalPages > 1 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 4 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    mt: 2,
+                    mb: 4,
+                  }}
+                >
                   <Pagination
                     count={totalPages}
                     page={currentPage}

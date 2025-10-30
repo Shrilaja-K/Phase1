@@ -1,11 +1,11 @@
-// SignUp.tsx
+
 import React, { Component } from 'react';
 import { withRouter } from './withRouter';
 import AuthForm from './AuthForm';
 
 class SignUp extends Component<any> {
   handleSignUp = (username: string) => {
-    this.props.onSignUp(username); // notify App
+    this.props.onSignUp(username); 
   };
 
   render() {

@@ -1,7 +1,17 @@
 import React, { Component } from 'react';
-import { Box, Typography, CardMedia, Toolbar, Paper, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CardMedia,
+  Toolbar,
+  Paper,
+  CircularProgress,
+  IconButton,
+} from '@mui/material';
+
 import axios from 'axios';
 import { withRouter } from './withRouter';
+import MealCard from './MealCard';
 
 interface RecipeState {
   meal: any | null;
@@ -48,11 +58,16 @@ class Recipe extends Component<any, RecipeState> {
       return (
         <Box
           sx={{
-            mt: 10,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: '80vh',
+            bgcolor: 'rgba(255, 255, 255, 0.7)', 
+            zIndex: 9999, 
           }}
         >
           <CircularProgress size={60} color="primary" />
@@ -79,14 +94,18 @@ class Recipe extends Component<any, RecipeState> {
           bgcolor: '#D4DE95',
           overflowX: 'hidden',
           boxSizing: 'border-box',
-          overflowY:'hidden'
         }}
       >
         <Toolbar />
 
         <Typography
           variant="h4"
-          sx={{ mb: 3, textAlign: 'center', color: '#3D4127' }}
+          sx={{
+            mb: 1,
+            textAlign: 'center',
+            color: '#3D4127',
+            position: 'relative',
+          }}
         >
           {meal.strMeal}
         </Typography>

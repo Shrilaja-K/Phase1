@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import MealCarousel from './MealCarousel';
 import { withRouter } from './withRouter';
+import MealCard from './MealCard';
 
 class Sweets extends Component<any> {
   render() {

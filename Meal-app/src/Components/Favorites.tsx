@@ -1,69 +1,136 @@
 import React, { Component } from 'react';
-import { Box, Paper, Typography, Grid, Button } from '@mui/material';
+import { Box, Grid, Paper, Typography, IconButton, Toolbar } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { FavoritesContext } from './FavoritesContext';
+import { withRouter } from './withRouter';
 
-interface FavoritesProps {
-  loggedIn: boolean;
-  username: string;
-  favoriteMeals: any[];
-  onRemoveMeal: (idMeal: string) => void;
+interface Props {
+  navigate: (path: string) => void;
 }
 
-class Favorites extends Component<FavoritesProps> {
+interface State {}
+
+class Favorites extends Component<Props, State> {
+  static contextType = FavoritesContext;
+  declare context: React.ContextType<typeof FavoritesContext>;
+
+  handleMealClick = (id: string) => {
+    this.props.navigate(`/recipe/${id}`);
+  };
+
+  handleRemoveFavorite = (id: string) => {
+    this.context.removeFavorite(id);
+  };
+
   render() {
-    const { favoriteMeals, loggedIn, onRemoveMeal } = this.props;
+    const { favorites } = this.context;
 
-    if (!loggedIn) {
+    if (!favorites.length) {
       return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6">Please log in to view your favorites.</Typography>
-        </Box>
-      );
-    }
-
-    if (favoriteMeals.length === 0) {
-      return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6">No favorite meals yet. Add some from the meal list!</Typography>
+        <Box
+          sx={{
+            backgroundColor: '#D4DE95',
+            minHeight: '100vh',
+            width: '100vw',
+            overflowX: 'hidden',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant="h5" color="textSecondary" textAlign="center">
+            No favorites yet!
+          </Typography>
         </Box>
       );
     }
 
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
+      <Box
+        sx={{
+          backgroundColor: '#D4DE95',
+          minHeight: '100vh',  
+          width: '100vw',  
+          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          pb: 3,
+        }}
+      >
+        <Toolbar /> 
+
+        <Typography
+          variant="h4"
+          sx={{
+            textAlign: 'center',
+            mb: 3,
+            mt: 10,
+          }}
+        >
           My Favorites
         </Typography>
-        <Grid container spacing={3} justifyContent="center">
-          {favoriteMeals.map((meal) => (
-            <Grid key={meal.idMeal} item xs={12} sm={6} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            width: { xs: '95%', sm: '90%', md: '80%' },
+            justifyContent: 'center',
+            p: 2,
+          }}
+        >
+          {favorites.map((meal: any) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              key={meal.idMeal}
+              sx={{ display: 'flex', justifyContent: 'center' }}
+            >
               <Paper
+                onClick={() => this.handleMealClick(meal.idMeal)}
                 sx={{
-                  width: '100%',
-                  maxWidth: 360,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  textAlign: 'center',
+                  width: 250,
+                  cursor: 'pointer',
                   overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  borderRadius: 2,
+                  '&:hover img': { transform: 'scale(1.05)' },
+                  transition: '0.3s',
+                  position: 'relative',
                 }}
               >
-                <Box
-                  component="img"
+                <img
                   src={meal.strMealThumb}
                   alt={meal.strMeal}
-                  sx={{ width: '100%', height: 180, objectFit: 'cover' }}
+                  style={{
+                    width: '100%',
+                    height: 180,
+                    objectFit: 'cover',
+                    transition: 'transform 0.3s',
+                  }}
                 />
-                <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Typography sx={{ fontWeight: 500, mb: 1 }}>{meal.strMeal}</Typography>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    onClick={() => onRemoveMeal(meal.idMeal)}
-                  >
-                    Remove
-                  </Button>
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle1" textAlign="center">
+                    {meal.strMeal}
+                  </Typography>
                 </Box>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this.handleRemoveFavorite(meal.idMeal);
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'rgba(255,255,255,0.7)',
+                  }}
+                >
+                  <FavoriteIcon color="error" />
+                </IconButton>
               </Paper>
             </Grid>
           ))}
@@ -73,4 +140,4 @@ class Favorites extends Component<FavoritesProps> {
   }
 }
 
-export default Favorites;
+export default withRouter(Favorites);

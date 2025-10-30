@@ -1,4 +1,4 @@
-// Components/AuthForm.tsx
+
 import React, { Component } from 'react';
 import { Box, Paper, TextField, Button, Typography, Link } from '@mui/material';
 
@@ -43,10 +43,10 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
   handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (this.validateForm()) {
-      // call parent to update App state
+     
       const username = this.props.mode === 'signup' ? this.state.name : this.state.email.split('@')[0];
       this.props.onAuthSuccess(username);
-      this.props.navigate('/'); // go to home
+      this.props.navigate('/'); 
     }
   };
 
@@ -62,7 +62,7 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
           left: 0,
           width: '100%',
           height: '100vh',
-          backgroundColor: '#737a3fb0',
+          backgroundColor: '#D4DE95',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',

@@ -11,13 +11,12 @@ import Footer from './Components/Footer';
 import ContactUs from './Components/ContactUs';
 import Sweets from './Components/Sweets';
 import Categories from './Components/Categories';
-import Addrecipe from './Components/Addrecipe';
-import Settings from './Components/Settings';
-import Profile from './Components/Profile';
+
 import Recipe from './Components/Recipe';
 import Filter from './Components/Filter';
 import ErrorBoundary from './Components/Errorboundary';
 import Favorites from './Components/Favorites';
+import { FavoritesProvider } from './Components/FavoritesContext';
 
 class App extends Component {
   state = {
@@ -37,14 +36,15 @@ class App extends Component {
     const { loggedIn, username } = this.state;
 
     return (
+      <FavoritesProvider>
       <Router>
         <Appbardiv loggedIn={loggedIn} username={username} onLogout={this.handleLogout} />
-
+         <Box sx={{overflowX:'hiiden',overflowY:'hidden'}}>
         <Routes>
           <Route
             path="/"
             element={
-              <Box sx={{ width: '100%', overflowX: 'hidden', overflowY: 'hidden' }}>
+              <Box sx={{ width: '100%' }}>
                 <VideoSection />
                 <Imagemovement />
                 <TrendingMeals />
@@ -54,19 +54,21 @@ class App extends Component {
               </Box>
             }
           />
+          
           <Route path="/login" element={<Login onLogin={this.handleLogin} />} />
           <Route path="/signup" element={<SignUp onSignUp={this.handleLogin} />} />
           <Route path="/categories" element={<Categories />} />
-          <Route path="/addrecipe" element={<Addrecipe />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
+          
           <Route path="/recipe/:id" element={<Recipe />} />
           <Route path="/filter" element={<Filter />} />
           <Route path="/favorites" element={<Favorites/>}/>
           <Route path="*" element={<ErrorBoundary />} />
+          
 
         </Routes>
+        </Box>
       </Router>
+      </FavoritesProvider>
     );
   }
 }

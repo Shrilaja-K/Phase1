@@ -5,8 +5,6 @@ import LoginIcon from '@mui/icons-material/Login';
 import CategoryIcon from '@mui/icons-material/Category';
 import SearchIcon from '@mui/icons-material/Search';
 import { withRouter } from './withRouter'; 
-import CreateIcon from '@mui/icons-material/Create';
-import SettingsIcon from '@mui/icons-material/Settings';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
@@ -19,10 +17,10 @@ class Sidebar extends Component {
       { text: 'Login', icon: <LoginIcon />, path: '/login' },
       { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
       { text: 'Search', icon: <SearchIcon />, path: '/search' },
-      { text: 'Add Recipe', icon:<CreateIcon/>,path:'/addrecipe'},
+     
       { text: 'Favorites',icon:<FavoriteIcon/>,path:'/favorites'},
       { text: 'Filter',icon:<FilterAltIcon/>,path:'/filter'},
-      { text: 'settings',icon:<SettingsIcon/>,path:'/settings'}
+      
     ];
 
     return (

@@ -3,6 +3,7 @@ import { Box, Typography, IconButton, Paper, CircularProgress } from '@mui/mater
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { withRouter } from './withRouter';
+import MealCard from './MealCard';
 
 class ImageMovement extends Component<any, any> {
   state = {
@@ -81,7 +82,7 @@ class ImageMovement extends Component<any, any> {
         </IconButton>
 
         <Box
-          onClick={() => this.handleClickMeal(meal.idMeal)} // <-- Redirect on click
+          onClick={() => this.handleClickMeal(meal.idMeal)} 
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
@@ -91,7 +92,7 @@ class ImageMovement extends Component<any, any> {
             borderRadius: 2,
             bgcolor: '#D4DE95',
             width: '100%',
-            cursor: 'pointer', // show clickable cursor
+            cursor: 'pointer',
             alignItems: 'center',
           }}
         >

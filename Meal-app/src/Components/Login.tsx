@@ -1,11 +1,11 @@
-// Login.tsx
+
 import React, { Component } from 'react';
 import { withRouter } from './withRouter';
 import AuthForm from './AuthForm';
 
 class Login extends Component<any> {
   handleLogin = (username: string) => {
-    this.props.onLogin(username); // notify App
+    this.props.onLogin(username); 
   };
 
   render() {

@@ -12,6 +12,7 @@ import {
   ListItemText,
   Paper,
   CircularProgress,
+  Badge,
 } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -21,11 +22,10 @@ import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CategoryIcon from '@mui/icons-material/Category';
-import CreateIcon from '@mui/icons-material/Create';
-import SettingsIcon from '@mui/icons-material/Settings';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { withRouter } from './withRouter';
+import { FavoritesContext } from './FavoritesContext';
 
 interface Props {
   loggedIn: boolean;
@@ -44,6 +44,9 @@ interface State {
 }
 
 class Appbardiv extends Component<Props, State> {
+  static contextType = FavoritesContext;
+  declare context: React.ContextType<typeof FavoritesContext>;
+
   searchTimer: any = null;
 
   state: State = {
@@ -125,17 +128,22 @@ class Appbardiv extends Component<Props, State> {
     this.setState({ meals: [], searchQuery: '' });
   };
 
+  handleLogout = () => {
+    this.context.clearFavorites();
+    this.props.onLogout();
+    this.setState({ drawerOpen: false });
+  };
+
   render() {
     const { drawerOpen, searchQuery, meals, isMobile, isLoading } = this.state;
-    const { loggedIn, username, onLogout } = this.props;
+    const { loggedIn, username } = this.props;
+    const { favorites } = this.context;
 
     const menuItems = [
       { text: 'Home', icon: <HomeIcon />, path: '/' },
       { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
-      { text: 'Add Recipe', icon: <CreateIcon />, path: '/addrecipe' },
-      { text: 'Favorites',icon:<FavoriteIcon/>,path:'/favorites'},
+      { text: 'Favorites', icon: <FavoriteIcon />, path: '/favorites' },
       { text: 'Filter', icon: <FilterAltIcon />, path: '/filter' },
-      { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     ];
 
     if (!loggedIn) {
@@ -147,70 +155,170 @@ class Appbardiv extends Component<Props, State> {
     return (
       <Box>
         <AppBar sx={{ position: 'fixed', bgcolor: '#3D4127' }}>
-          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', py: { xs: 1.5, sm: 1 } }}>
-            {/* Left: Back or Menu */}
+          <Toolbar
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              py: { xs: 1.5, sm: 1 },
+            }}
+          >
+           
             <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               {this.showBackButton() ? (
-                <IconButton edge="start" color="inherit" aria-label="back" onClick={this.handleBack} sx={{ mr: 1 }}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="back"
+                  onClick={this.handleBack}
+                  sx={{ mr: 1 }}
+                >
                   <ArrowBackIcon />
                 </IconButton>
               ) : (
-                <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 1 }} onClick={this.toggleDrawer(true)}>
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  sx={{ mr: 1 }}
+                  onClick={this.toggleDrawer(true)}
+                >
                   <MenuIcon />
                 </IconButton>
               )}
 
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.jpg" alt="logo" style={{ height: '50px', width: '50px', borderRadius: '50%' }} />
+                <img
+                  src="/logo.jpg"
+                  alt="logo"
+                  style={{ height: '50px', width: '50px', borderRadius: '50%' }}
+                />
                 <Typography variant="h6" sx={{ marginLeft: '8px', fontWeight: 500 }}>
                   Meal Mate {loggedIn && `- Welcome, ${username}`}
                 </Typography>
               </Box>
             </Box>
 
-            {/* Center Search */}
-            <Box sx={{ flex: isMobile ? '1 1 100%' : '0 1 400px', display: 'flex', justifyContent: 'center', mt: isMobile ? 1 : 0, position: 'relative' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: '#BAC095', borderRadius: '4px', padding: '0 8px', width: '100%' }}>
+           
+            <Box
+              sx={{
+                flex: isMobile ? '1 1 100%' : '0 1 400px',
+                display: 'flex',
+                justifyContent: 'center',
+                mt: isMobile ? 1 : 0,
+                position: 'relative',
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  backgroundColor: '#BAC095',
+                  borderRadius: '4px',
+                  padding: '0 8px',
+                  width: '100%',
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Search meals..."
                   value={searchQuery}
                   onChange={this.handleSearchChange}
-                  style={{ outline: 'none', border: 'none', backgroundColor: '#BAC095', flexGrow: 1, padding: '8px' }}
+                  style={{
+                    outline: 'none',
+                    border: 'none',
+                    backgroundColor: '#BAC095',
+                    flexGrow: 1,
+                    padding: '8px',
+                  }}
                 />
-                {isLoading ? <CircularProgress size={24} /> : <IconButton sx={{ p: '5px' }} aria-label="search"><SearchIcon /></IconButton>}
+                {isLoading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <IconButton sx={{ p: '5px' }} aria-label="search">
+                    <SearchIcon />
+                  </IconButton>
+                )}
               </Box>
 
-              {/* Search dropdown */}
-              {meals.length > 0 && (
-                <Paper sx={{ position: 'absolute', top: '100%', left: 0, right: 0, maxHeight: 300, overflowY: 'auto', zIndex: 1200, boxShadow: '0px 4px 6px rgba(0,0,0,0.1)' }}>
-                  {meals.map((meal) => (
-                    <ListItemButton key={meal.idMeal} onClick={() => this.handleMealClick(meal.idMeal)}>
-                      <ListItemText primary={meal.strMeal} />
+           
+              {searchQuery && (
+                <Paper
+                  sx={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    zIndex: 1200,
+                    boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  {isLoading ? (
+                    <ListItemButton>
+                      <ListItemText primary="Loading..." />
                     </ListItemButton>
-                  ))}
+                  ) : meals.length > 0 ? (
+                    meals.map((meal) => (
+                      <ListItemButton
+                        key={meal.idMeal}
+                        onClick={() => this.handleMealClick(meal.idMeal)}
+                      >
+                        <ListItemText primary={meal.strMeal} />
+                      </ListItemButton>
+                    ))
+                  ) : (
+                    <ListItemButton>
+                      <ListItemText primary="No results found" />
+                    </ListItemButton>
+                  )}
                 </Paper>
               )}
             </Box>
 
-            {/* Right Buttons */}
+          
             {!isMobile && (
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button color="inherit" onClick={() => this.navigateTo('/favorites')}><FavoriteIcon sx={{ color: 'white' }} /></Button>
-                <Button color="inherit" onClick={() => this.navigateTo('/filter')}><FilterAltIcon sx={{ color: 'white' }} /></Button>
+                <IconButton color="inherit" onClick={() => this.navigateTo('/favorites')}>
+                  <Badge badgeContent={favorites.length} color="error">
+                    <FavoriteIcon sx={{ color: 'white' }} />
+                  </Badge>
+                </IconButton>
+
+                <Button color="inherit" onClick={() => this.navigateTo('/filter')}>
+                  <FilterAltIcon sx={{ color: 'white' }} />
+                </Button>
                 <Button color="inherit" onClick={() => this.navigateTo('/')}>Home</Button>
-                {loggedIn ? <Button color="inherit" onClick={onLogout}>Logout</Button> : <Button color="inherit" onClick={() => this.navigateTo('/login')}>Login</Button>}
+                {loggedIn ? (
+                  <Button color="inherit" onClick={this.handleLogout}>
+                    Logout
+                  </Button>
+                ) : (
+                  <Button color="inherit" onClick={() => this.navigateTo('/login')}>
+                    Login
+                  </Button>
+                )}
               </Box>
             )}
           </Toolbar>
         </AppBar>
 
-        {/* Drawer menu */}
+      
         <Drawer open={drawerOpen} onClose={this.toggleDrawer(false)}>
           <Box sx={{ width: { xs: 200, sm: 250 } }}>
             <List>
               {menuItems.map((item) => (
-                <ListItemButton key={item.text} onClick={() => { if (item.text === 'Logout') { onLogout(); this.setState({ drawerOpen: false }); } else { this.navigateTo(item.path); } }}>
+                <ListItemButton
+                  key={item.text}
+                  onClick={() => {
+                    if (item.text === 'Logout') {
+                      this.handleLogout();
+                    } else {
+                      this.navigateTo(item.path);
+                    }
+                  }}
+                >
                   <ListItemIcon sx={{ color: '#3D4127' }}>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
                 </ListItemButton>
