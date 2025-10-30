@@ -39,12 +39,12 @@ class App extends Component {
       <FavoritesProvider>
       <Router>
         <Appbardiv loggedIn={loggedIn} username={username} onLogout={this.handleLogout} />
-         <Box sx={{overflowX:'hiiden',overflowY:'hidden'}}>
+         
         <Routes>
           <Route
             path="/"
             element={
-              <Box sx={{ width: '100%' }}>
+              <Box sx={{ width: '100%', overflowX: 'hidden', overflowY: 'hidden' }}>
                 <VideoSection />
                 <Imagemovement />
                 <TrendingMeals />
@@ -66,7 +66,6 @@ class App extends Component {
           
 
         </Routes>
-        </Box>
       </Router>
       </FavoritesProvider>
     );
