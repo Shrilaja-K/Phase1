@@ -1,10 +1,9 @@
-
 import React, { Component } from 'react';
 import { Box, Paper, TextField, Button, Typography, Link } from '@mui/material';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
-  onAuthSuccess: (name: string) => void;
+  onAuthSuccess: (username: string, email?: string) => void;
   navigate: (path: string) => void;
 }
 
@@ -12,7 +11,7 @@ interface AuthFormState {
   name: string;
   email: string;
   password: string;
-  errors: any;
+  errors: Record<string, string>;
 }
 
 export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
@@ -28,11 +27,11 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
 
   validateForm = () => {
     const { name, email, password } = this.state;
-    const errors: any = {};
+    const errors: Record<string, string> = {};
 
     if (this.props.mode === 'signup' && !name.trim()) errors.name = 'Full name is required';
     if (!email.trim()) errors.email = 'Email is required';
-    else if (!email.includes('@')) errors.email = 'Enter valid email';
+    else if (!email.includes('@')) errors.email = 'Enter a valid email';
     if (!password.trim()) errors.password = 'Password is required';
     else if (password.length < 6) errors.password = 'Password must be at least 6 characters';
 
@@ -43,9 +42,8 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
   handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (this.validateForm()) {
-     
       const username = this.props.mode === 'signup' ? this.state.name : this.state.email.split('@')[0];
-      this.props.onAuthSuccess(username);
+      this.props.onAuthSuccess(username, this.state.email);
       this.props.navigate('/'); 
     }
   };
@@ -69,6 +67,22 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
           overflow: 'hidden',
         }}
       >
+        <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url('/bg.jpeg')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    opacity: 0.3, 
+                   
+                   
+                  }}
+                />
         <Paper sx={{ p: 4, width: '100%', maxWidth: 400 }}>
           <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
             {mode === 'login' ? 'Login' : 'Sign Up'}
@@ -111,7 +125,12 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
               sx={{ mb: 3 }}
             />
 
-            <Button fullWidth variant="contained" type="submit" sx={{ backgroundColor: '#3D4127', color: '#fff' }}>
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              sx={{ backgroundColor: '#3D4127', color: '#fff' }}
+            >
               {mode === 'login' ? 'Login' : 'Sign Up'}
             </Button>
           </form>

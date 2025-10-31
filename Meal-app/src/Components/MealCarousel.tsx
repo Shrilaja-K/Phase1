@@ -64,7 +64,7 @@ class MealCarousel extends Component<Props, State> {
     const scrollMeals = [...meals, ...meals];
 
     return (
-      <Box sx={{ width: '100%', py: 4, overflow: 'hidden' }}>
+      <Box sx={{ width: '100%', overflow: 'hidden' }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 4, textAlign: 'center' }}>
           {title}
         </Typography>
@@ -76,12 +76,13 @@ class MealCarousel extends Component<Props, State> {
                 onClick={() => this.handleClick(meal.idMeal)}
                 sx={{
                   width: 220,
-                  height: 300,
                   flexShrink: 0,
                   borderRadius: 2,
                   boxShadow: 3,
                   overflow: 'hidden',
                   cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column', 
                   '&:hover': { transform: 'scale(1.05)', boxShadow: 6 },
                   transition: '0.2s',
                 }}
@@ -89,14 +90,14 @@ class MealCarousel extends Component<Props, State> {
                 <img
                   src={meal.strMealThumb}
                   alt={meal.strMeal}
-                  style={{ width: '100%', height: 180, objectFit: 'cover' }}
+                  style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
                 />
                 <Typography
                   variant="subtitle1"
                   sx={{
                     textAlign: 'center',
-                    mt: 1,
                     px: 1,
+                    mt: 1,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

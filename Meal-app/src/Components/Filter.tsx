@@ -14,13 +14,30 @@ import { withRouter } from './withRouter';
 import CategoryIcon from '@mui/icons-material/Category';
 import PublicIcon from '@mui/icons-material/Public';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
-
-
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 const APPBAR_HEIGHT = 80;
 
-class FilterPage extends Component<any> {
-  state = {
+interface Meal {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+}
+
+interface FilterPageState {
+  categories: string[];
+  areas: string[];
+  ingredients: string[];
+  selectedCategory: string;
+  selectedArea: string;
+  selectedIngredient: string;
+  meals: Meal[];
+  currentPage: number;
+  lastFilters: any;
+}
+
+class FilterPage extends Component<any, FilterPageState> {
+  state: FilterPageState = {
     categories: [],
     areas: [],
     ingredients: [],
@@ -29,8 +46,7 @@ class FilterPage extends Component<any> {
     selectedIngredient: '',
     meals: [],
     currentPage: 1,
-    lastFilters: null as any,
-    
+    lastFilters: null,
   };
 
   async componentDidMount() {
@@ -57,9 +73,20 @@ class FilterPage extends Component<any> {
     }
   }
 
+  isFavorite = (idMeal: string) => {
+    return this.props.favorites.some((m: Meal) => m.idMeal === idMeal);
+  };
+
+  toggleFavorite = (meal: Meal) => {
+    if (this.isFavorite(meal.idMeal)) {
+      this.props.removeFavorite(meal.idMeal);
+    } else {
+      this.props.addFavorite(meal);
+    }
+  };
+
   handleFilter = async () => {
-    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } =
-      this.state;
+    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
 
     const currentFilters = {
       category: selectedCategory,
@@ -67,6 +94,7 @@ class FilterPage extends Component<any> {
       ingredient: selectedIngredient,
     };
 
+  
     if (
       lastFilters &&
       lastFilters.category === currentFilters.category &&
@@ -100,8 +128,6 @@ class FilterPage extends Component<any> {
     this.setState({ currentPage: value });
   };
 
-  
-
   render() {
     const {
       categories,
@@ -112,7 +138,6 @@ class FilterPage extends Component<any> {
       selectedIngredient,
       meals,
       currentPage,
-      
     } = this.state;
 
     const mealsPerPage = 6;
@@ -128,227 +153,245 @@ class FilterPage extends Component<any> {
           flexDirection: 'column',
           minHeight: '100vh',
           width: '100%',
-          backgroundColor: '#D4DE95',
           overflowX: 'hidden',
+          position: 'relative',
+          py: { xs: 4, md: 8 },
         }}
       >
-        <Box sx={{ height: `${APPBAR_HEIGHT}px` }} />
-
-       
         <Box
           sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
             width: '100%',
-            maxWidth: 600,
-            mt: 2,
-            mx: 'auto',
-            px: { xs: 0, sm: 2 },
+            height: '100%',
+            backgroundImage: `url('/b3.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.3,
           }}
-        >
-          <Paper
+        />
+
+        <Box sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ height: `${APPBAR_HEIGHT}px` }} />
+
+          <Box
             sx={{
-              p: { xs: 2, sm: 3 },
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 2,
-              justifyContent: 'center',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-              backgroundColor: '#fff',
               width: '100%',
-              borderRadius: 0,
+              maxWidth: 600,
+              mt: 2,
+              mx: 'auto',
+              px: { xs: 0, sm: 2 },
             }}
           >
-            <Autocomplete
-              options={categories}
-              value={selectedCategory}
-              onChange={(_e, newValue) =>
-                this.setState({ selectedCategory: newValue || '' })
-              }
-              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={
-                    <>
-                      <CategoryIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                      Category
-                    </>
-                  }
-                />
-              )}
-            />
-
-            <Autocomplete
-              options={areas}
-              value={selectedArea}
-              onChange={(_e, newValue) =>
-                this.setState({ selectedArea: newValue || '' })
-              }
-              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={
-                    <>
-                      <PublicIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                      Area
-                    </>
-                  }
-                />
-              )}
-            />
-
-            <Autocomplete
-              options={ingredients}
-              value={selectedIngredient}
-              onChange={(_e, newValue) =>
-                this.setState({ selectedIngredient: newValue || '' })
-              }
-              sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={
-                    <>
-                      <RestaurantIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                      Ingredient
-                    </>
-                  }
-                />
-              )}
-            />
-
-            <Button
-              variant="contained"
+            <Paper
               sx={{
-                backgroundColor: '#30413496',
-                color: '#fff',
-                minHeight: '56px',
-                px: 5,
-                flex: { xs: '1 1 100%', sm: 'auto' },
-                '&:hover': { backgroundColor: '#2d5536ff' },
+                p: { xs: 2, sm: 3 },
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 2,
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                backgroundColor: '#fff',
+                width: '100%',
+                borderRadius: 0,
               }}
-              onClick={this.handleFilter}
             >
-              Search
-            </Button>
-          </Paper>
-        </Box>
+              <Autocomplete
+                options={categories}
+                value={selectedCategory}
+                onChange={(_e, newValue) =>
+                  this.setState({ selectedCategory: newValue || '' })
+                }
+                sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={
+                      <>
+                        <CategoryIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                        Category
+                      </>
+                    }
+                  />
+                )}
+              />
 
-    
-        <Box sx={{ flexGrow: 1, width: '100vw', mt: 6, mx: 0 }}>
-          {meals.length === 0 ? (
-            <Typography
-              sx={{ textAlign: 'center', color: '#777', fontSize: 18, mt: 4 }}
-            >
-              No meals to show. Use the filter above.
-            </Typography>
-          ) : (
-            <>
-              <Grid
-                container
-                spacing={3}
-                justifyContent="center"
+              <Autocomplete
+                options={areas}
+                value={selectedArea}
+                onChange={(_e, newValue) =>
+                  this.setState({ selectedArea: newValue || '' })
+                }
+                sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={
+                      <>
+                        <PublicIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                        Area
+                      </>
+                    }
+                  />
+                )}
+              />
+
+              <Autocomplete
+                options={ingredients}
+                value={selectedIngredient}
+                onChange={(_e, newValue) =>
+                  this.setState({ selectedIngredient: newValue || '' })
+                }
+                sx={{ flex: { xs: '1 1 100%', sm: '1 1 180px' } }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={
+                      <>
+                        <RestaurantIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                        Ingredient
+                      </>
+                    }
+                  />
+                )}
+              />
+
+              <Button
+                variant="contained"
                 sx={{
-                  width: '100%',
-                  mx: 'auto',
-                  boxSizing: 'border-box',
-                  mb: 4,
+                  backgroundColor: '#636B2F',
+                  color: '#e9f3edff',
+                  minHeight: '56px',
+                  px: 5,
+                  flex: { xs: '1 1 100%', sm: 'auto' },
+                  '&:hover': { backgroundColor: '#2d5536ff' },
                 }}
+                onClick={this.handleFilter}
               >
-                {currentMeals.map((meal: any) => (
-                  <Grid
-                    item
-                    key={meal.idMeal}
-                    xs={12}
-                    sm={6}
-                    md={4}
-                    sx={{ display: 'flex', justifyContent: 'center' }}
-                  >
-                    <Paper
-                      onClick={() =>
-                        this.props.navigate(`/recipe/${meal.idMeal}`)
-                      }
-                      sx={{
-                        width: '100%',
-                        maxWidth: 360,
-                        aspectRatio: '1 / 1',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        overflow: 'hidden',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        transition: '0.2s',
-                        position: 'relative',
-                        '&:hover': {
-                          transform: 'scale(1.03)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                        },
-                      }}
-                    >
-                      
-                      
+                Search
+              </Button>
+            </Paper>
+          </Box>
 
-                      <Box
-                        component="img"
-                        src={meal.strMealThumb}
-                        alt={meal.strMeal}
+          <Box sx={{ flexGrow: 1, width: '100vw', mt: 6, mx: 0 }}>
+            {meals.length === 0 ? (
+              <Typography
+                sx={{ textAlign: 'center', color: '#777', fontSize: 18, mt: 4 }}
+              >
+                No meals to show. Use the filter above.
+              </Typography>
+            ) : (
+              <>
+                <Grid
+                  container
+                  spacing={3}
+                  justifyContent="center"
+                  sx={{
+                    width: '100%',
+                    mx: 'auto',
+                    boxSizing: 'border-box',
+                    mb: 4,
+                  }}
+                >
+                  {currentMeals.map((meal) => (
+                    <Grid
+                      item
+                      key={meal.idMeal}
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      sx={{ display: 'flex', justifyContent: 'center' }}
+                    >
+                      <Paper
+                        onClick={() =>
+                          this.props.navigate(`/recipe/${meal.idMeal}`)
+                        }
                         sx={{
                           width: '100%',
-                          height: '70%',
-                          objectFit: 'cover',
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          flexGrow: 1,
+                          maxWidth: 360,
+                          aspectRatio: '1 / 1',
                           display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: '#f9f9f9',
-                          p: 1,
+                          flexDirection: 'column',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          overflow: 'hidden',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: '0.2s',
+                          position: 'relative',
+                          '&:hover': {
+                            transform: 'scale(1.03)',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                          },
                         }}
                       >
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            this.toggleFavorite(meal);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(255,255,255,0.7)',
+                            zIndex: 2,
+                          }}
+                        >
+                          <FavoriteIcon
+                            color={
+                              this.isFavorite(meal.idMeal) ? 'error' : 'disabled'
+                            }
+                          />
+                        </IconButton>
+
+                        <Box
+                          component="img"
+                          src={meal.strMealThumb}
+                          alt={meal.strMeal}
+                          sx={{
+                            width: '100%',
+                            height: '70%',
+                            objectFit: 'cover',
+                          }}
+                        />
+
                         <Typography
                           sx={{
-                            fontWeight: 500,
-                            color: '#3D4127',
-                            textAlign: 'center',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            width: '90%',
+                            mt: 1,
+                            p: 1,
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                            color: '#333',
                           }}
                         >
                           {meal.strMeal}
                         </Typography>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
 
-              {totalPages > 1 && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    mt: 2,
-                    mb: 4,
-                  }}
-                >
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
                   <Pagination
                     count={totalPages}
                     page={currentPage}
                     onChange={this.handlePageChange}
-                    color="primary"
-                    shape="rounded"
-                    size="medium"
+                    sx={{
+                      "& .MuiPaginationItem-root": {
+                        color: "#3D4127",
+                      },
+                      "& .MuiPaginationItem-root.Mui-selected": {
+                        backgroundColor: "#3D4127",
+                        color: "#ffffff",
+                      },
+                    }}
                   />
                 </Box>
-              )}
-            </>
-          )}
+              </>
+            )}
+          </Box>
         </Box>
       </Box>
     );

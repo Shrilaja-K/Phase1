@@ -14,11 +14,9 @@ class Footer extends Component {
         }}
       >
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Meal App
-          </Typography>
+         
           <Typography variant="body2" sx={{ mb: 1 }}>
-            &copy; {new Date().getFullYear()} Meal App. All rights reserved.
+            &copy; {new Date().getFullYear()} Meal Mate. All rights reserved.
           </Typography>
         </Container>
       </Box>

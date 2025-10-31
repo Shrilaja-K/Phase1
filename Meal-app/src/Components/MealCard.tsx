@@ -1,32 +1,60 @@
 import React, { Component } from 'react';
-import { FavoritesContext } from './FavoritesContext';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import IconButton from '@mui/material/IconButton';
 
 interface Props {
   meal: any;
-  onClick?: () => void; 
+  onClick?: () => void;
+  onToggleFavorite?: (meal: any, isAdding: boolean) => void;
 }
 
-class MealCard extends Component<Props> {
-  static contextType = FavoritesContext;
-  declare context: React.ContextType<typeof FavoritesContext>;
 
-  handleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const { meal } = this.props;
-    const isFavorited = this.context.favorites.some((m: any) => m.idMeal === meal.idMeal);
+interface State {
+  isFavorite: boolean;
+}
 
-    if (isFavorited) {
-      this.context.removeFavorite(meal.idMeal);
-    } else {
-      this.context.addFavorite(meal);
-    }
+class MealCard extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      isFavorite: this.checkIfFavorite(props.meal.idMeal),
+    };
+  }
+
+  checkIfFavorite = (idMeal: string): boolean => {
+    const data = localStorage.getItem('favorites');
+    const favorites = data ? JSON.parse(data) : [];
+    return favorites.some((m: any) => m.idMeal === idMeal);
   };
+
+  toggleFavorite = (e: React.MouseEvent) => {
+  e.stopPropagation();
+  const { meal, onToggleFavorite } = this.props;
+  const data = localStorage.getItem('favorites');
+  const favorites = data ? JSON.parse(data) : [];
+
+  let updatedFavorites;
+  let isAdding = false;
+
+  if (this.state.isFavorite) {
+    updatedFavorites = favorites.filter((m: any) => m.idMeal !== meal.idMeal);
+  } else {
+    updatedFavorites = [...favorites, meal];
+    isAdding = true;
+  }
+
+  localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+
+  this.setState({ isFavorite: !this.state.isFavorite }, () => {
+    if (onToggleFavorite) onToggleFavorite(meal, isAdding);
+  });
+};
+
+
 
   render() {
     const { meal, onClick } = this.props;
-    const isFavorited = this.context.favorites.some((m: any) => m.idMeal === meal.idMeal);
+    const { isFavorite } = this.state;
 
     return (
       <div
@@ -47,10 +75,15 @@ class MealCard extends Component<Props> {
           <strong>{meal.strMeal}</strong>
         </div>
         <IconButton
-          onClick={this.handleFavorite}
-          sx={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(255,255,255,0.7)' }}
+          onClick={this.toggleFavorite}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            backgroundColor: 'rgba(255,255,255,0.7)',
+          }}
         >
-          <FavoriteIcon color={isFavorited ? 'error' : 'disabled'} />
+          <FavoriteIcon color={isFavorite ? 'error' : 'disabled'} />
         </IconButton>
       </div>
     );

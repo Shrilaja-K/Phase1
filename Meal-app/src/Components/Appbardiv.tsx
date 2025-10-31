@@ -21,18 +21,18 @@ import SearchIcon from '@mui/icons-material/Search';
 import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
-import CategoryIcon from '@mui/icons-material/Category';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { withRouter } from './withRouter';
-import { FavoritesContext } from './FavoritesContext';
 
 interface Props {
   loggedIn: boolean;
   username: string;
   onLogout: () => void;
-  navigate: (path: string) => void;
+  navigate: (path: string | number) => void;
   location: any;
+  params: any;
+  favorites: any[]; // Pass the full favorites array
 }
 
 interface State {
@@ -44,9 +44,6 @@ interface State {
 }
 
 class Appbardiv extends Component<Props, State> {
-  static contextType = FavoritesContext;
-  declare context: React.ContextType<typeof FavoritesContext>;
-
   searchTimer: any = null;
 
   state: State = {
@@ -61,7 +58,7 @@ class Appbardiv extends Component<Props, State> {
     this.setState({ drawerOpen: open });
   };
 
-  navigateTo = (path: string) => {
+  navigateTo = (path: string | number) => {
     this.props.navigate(path);
     this.setState({ drawerOpen: false, searchQuery: '', meals: [] });
   };
@@ -85,7 +82,6 @@ class Appbardiv extends Component<Props, State> {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateMobileState);
-    clearTimeout(this.searchTimer);
   }
 
   handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,8 +89,7 @@ class Appbardiv extends Component<Props, State> {
     this.setState({ searchQuery: query });
 
     clearTimeout(this.searchTimer);
-
-    if (query.trim()) {
+    if (query.trim().length >= 3) {
       this.searchTimer = setTimeout(() => {
         this.fetchMeals(query.trim());
       }, 500);
@@ -106,20 +101,17 @@ class Appbardiv extends Component<Props, State> {
   fetchMeals = async (query: string) => {
     this.setState({ isLoading: true });
 
-    const apiUrl =
-      query.length === 1
-        ? `https://www.themealdb.com/api/json/v1/1/search.php?f=${query}`
-        : `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
+    const apiUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(
+      query
+    )}`;
 
     try {
       const response = await fetch(apiUrl);
       const data = await response.json();
-      this.setState({ meals: data.meals || [] });
+      this.setState({ meals: data.meals || [], isLoading: false });
     } catch (error) {
       console.error(error);
-      this.setState({ meals: [] });
-    } finally {
-      this.setState({ isLoading: false });
+      this.setState({ meals: [], isLoading: false });
     }
   };
 
@@ -129,19 +121,16 @@ class Appbardiv extends Component<Props, State> {
   };
 
   handleLogout = () => {
-    this.context.clearFavorites();
     this.props.onLogout();
     this.setState({ drawerOpen: false });
   };
 
   render() {
     const { drawerOpen, searchQuery, meals, isMobile, isLoading } = this.state;
-    const { loggedIn, username } = this.props;
-    const { favorites } = this.context;
+    const { loggedIn, favorites } = this.props;
 
     const menuItems = [
       { text: 'Home', icon: <HomeIcon />, path: '/' },
-      { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
       { text: 'Favorites', icon: <FavoriteIcon />, path: '/favorites' },
       { text: 'Filter', icon: <FilterAltIcon />, path: '/filter' },
     ];
@@ -163,7 +152,6 @@ class Appbardiv extends Component<Props, State> {
               py: { xs: 1.5, sm: 1 },
             }}
           >
-           
             <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               {this.showBackButton() ? (
                 <IconButton
@@ -194,12 +182,11 @@ class Appbardiv extends Component<Props, State> {
                   style={{ height: '50px', width: '50px', borderRadius: '50%' }}
                 />
                 <Typography variant="h6" sx={{ marginLeft: '8px', fontWeight: 500 }}>
-                  Meal Mate {loggedIn && `- Welcome, ${username}`}
+                  Meal Mate
                 </Typography>
               </Box>
             </Box>
 
-           
             <Box
               sx={{
                 flex: isMobile ? '1 1 100%' : '0 1 400px',
@@ -221,7 +208,7 @@ class Appbardiv extends Component<Props, State> {
               >
                 <input
                   type="text"
-                  placeholder="Search meals..."
+                  placeholder="Search "
                   value={searchQuery}
                   onChange={this.handleSearchChange}
                   style={{
@@ -235,13 +222,18 @@ class Appbardiv extends Component<Props, State> {
                 {isLoading ? (
                   <CircularProgress size={24} />
                 ) : (
-                  <IconButton sx={{ p: '5px' }} aria-label="search">
+                  <IconButton
+                    sx={{ p: '5px' }}
+                    aria-label="search"
+                    onClick={() =>
+                      searchQuery.trim().length >= 3 && this.fetchMeals(searchQuery.trim())
+                    }
+                  >
                     <SearchIcon />
                   </IconButton>
                 )}
               </Box>
 
-           
               {searchQuery && (
                 <Paper
                   sx={{
@@ -277,11 +269,10 @@ class Appbardiv extends Component<Props, State> {
               )}
             </Box>
 
-          
             {!isMobile && (
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <IconButton color="inherit" onClick={() => this.navigateTo('/favorites')}>
-                  <Badge badgeContent={favorites.length} color="error">
+                  <Badge badgeContent={this.props.favorites.length} color="error">
                     <FavoriteIcon sx={{ color: 'white' }} />
                   </Badge>
                 </IconButton>
@@ -289,7 +280,9 @@ class Appbardiv extends Component<Props, State> {
                 <Button color="inherit" onClick={() => this.navigateTo('/filter')}>
                   <FilterAltIcon sx={{ color: 'white' }} />
                 </Button>
-                <Button color="inherit" onClick={() => this.navigateTo('/')}>Home</Button>
+                <Button color="inherit" onClick={() => this.navigateTo('/')}>
+                  Home
+                </Button>
                 {loggedIn ? (
                   <Button color="inherit" onClick={this.handleLogout}>
                     Logout
@@ -304,8 +297,18 @@ class Appbardiv extends Component<Props, State> {
           </Toolbar>
         </AppBar>
 
-      
-        <Drawer open={drawerOpen} onClose={this.toggleDrawer(false)}>
+        <Drawer
+          open={drawerOpen}
+          onClose={this.toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              width: { xs: 200, sm: 250 },
+              backgroundColor: 'rgba(61, 65, 39, 0.51)',
+              backdropFilter: 'blur(5px)',
+              color: '#fff',
+            },
+          }}
+        >
           <Box sx={{ width: { xs: 200, sm: 250 } }}>
             <List>
               {menuItems.map((item) => (
@@ -319,7 +322,7 @@ class Appbardiv extends Component<Props, State> {
                     }
                   }}
                 >
-                  <ListItemIcon sx={{ color: '#3D4127' }}>{item.icon}</ListItemIcon>
+                  <ListItemIcon sx={{ color: '#ebece3ff' }}>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
                 </ListItemButton>
               ))}

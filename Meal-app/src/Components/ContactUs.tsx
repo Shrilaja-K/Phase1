@@ -1,18 +1,32 @@
 import React, { Component } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
 
-class ContactUs extends Component {
-  state = {
-    name: '',
-    email: '',
-    message: '',
+interface ContactUsProps {
+  loggedIn: boolean;
+  userEmail?: string;
+}
+
+interface ContactUsState {
+  name: string;
+  email: string;
+  message: string;
+}
+
+class ContactUs extends Component<ContactUsProps, ContactUsState> {
+  constructor(props: ContactUsProps) {
+    super(props);
+    this.state = {
+      name: '',
+      email: props.loggedIn && props.userEmail ? props.userEmail : '',
+      message: '',
+    };
+  }
+
+  handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    this.setState({ [e.target.name]: e.target.value } as any);
   };
 
-  handleChange = (e) => {
-    this.setState({ [e.target.name]: e.target.value });
-  };
-
-  handleSubmit = (e) => {
+  handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const { name, email, message } = this.state;
     if (!name || !email || !message) {
@@ -21,11 +35,12 @@ class ContactUs extends Component {
     }
     console.log('Form Submitted:', this.state);
     alert('Thank you for contacting us!');
-    this.setState({ name: '', email: '', message: '' });
+    this.setState({ name: '', email: this.props.loggedIn && this.props.userEmail ? this.props.userEmail : '', message: '' });
   };
 
   render() {
     const { name, email, message } = this.state;
+    const { loggedIn } = this.props;
 
     return (
       <Box
@@ -33,15 +48,15 @@ class ContactUs extends Component {
           maxWidth: 500,
           mx: 'auto',
           my: 6,
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 3,
-          backgroundColor: '#f9f9f9',
+          p: 5,
+          borderRadius: 4,
+          boxShadow: '0 8px 25px rgba(0,0,0,0.25)',
+          background: 'linear-gradient(135deg, #D4DE95 0%, #BAC095 100%)',
         }}
       >
         <Typography
           variant="h4"
-          sx={{ mb: 3, textAlign: 'center', color: '#3D4127' }}
+          sx={{ mb: 3, textAlign: 'center', color: '#3D4127', fontWeight: 'bold' }}
         >
           Contact Us
         </Typography>
@@ -54,7 +69,16 @@ class ContactUs extends Component {
             onChange={this.handleChange}
             fullWidth
             required
-            sx={{ mb: 2 }}
+            sx={{
+              mb: 2,
+              input: { color: '#3D4127', fontWeight: 500 },
+              '& label': { color: '#3D4127' },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#636B2F' },
+                '&:hover fieldset': { borderColor: '#3D4127' },
+                '&.Mui-focused fieldset': { borderColor: '#3D4127' },
+              },
+            }}
           />
           <TextField
             label="Email"
@@ -64,7 +88,17 @@ class ContactUs extends Component {
             onChange={this.handleChange}
             fullWidth
             required
-            sx={{ mb: 2 }}
+            InputProps={{ readOnly: loggedIn }}
+            sx={{
+              mb: 2,
+              input: { color: '#3D4127', fontWeight: 500 },
+              '& label': { color: '#3D4127' },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#636B2F' },
+                '&:hover fieldset': { borderColor: '#3D4127' },
+                '&.Mui-focused fieldset': { borderColor: '#3D4127' },
+              },
+            }}
           />
           <TextField
             label="Message"
@@ -75,17 +109,27 @@ class ContactUs extends Component {
             required
             multiline
             rows={4}
-            sx={{ mb: 3 }}
+            sx={{
+              mb: 3,
+              input: { color: '#3D4127', fontWeight: 500 },
+              '& label': { color: '#3D4127' },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#636B2F' },
+                '&:hover fieldset': { borderColor: '#3D4127' },
+                '&.Mui-focused fieldset': { borderColor: '#3D4127' },
+              },
+            }}
           />
 
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
             sx={{
               backgroundColor: '#3D4127',
-              '&:hover': { backgroundColor: '#2a2c20' },
+              color: '#D4DE95',
+              fontWeight: 'bold',
+              '&:hover': { backgroundColor: '#636B2F' },
             }}
           >
             Send Message

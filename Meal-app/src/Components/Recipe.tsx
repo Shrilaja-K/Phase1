@@ -6,22 +6,22 @@ import {
   Toolbar,
   Paper,
   CircularProgress,
-  IconButton,
+  Button,
 } from '@mui/material';
-
 import axios from 'axios';
 import { withRouter } from './withRouter';
-import MealCard from './MealCard';
 
 interface RecipeState {
   meal: any | null;
   isLoading: boolean;
+  showFullInstructions: boolean;
 }
 
 class Recipe extends Component<any, RecipeState> {
   state: RecipeState = {
     meal: null,
     isLoading: true,
+    showFullInstructions: false,
   };
 
   componentDidMount() {
@@ -44,15 +44,21 @@ class Recipe extends Component<any, RecipeState> {
       const res = await axios.get(
         `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`
       );
-      this.setState({ meal: res.data.meals[0], isLoading: false });
+      this.setState({ meal: res.data.meals[0], isLoading: false, showFullInstructions: false });
     } catch (error) {
       console.error(error);
       this.setState({ meal: null, isLoading: false });
     }
   };
 
+  toggleInstructions = () => {
+    this.setState((prevState) => ({
+      showFullInstructions: !prevState.showFullInstructions,
+    }));
+  };
+
   render() {
-    const { meal, isLoading } = this.state;
+    const { meal, isLoading, showFullInstructions } = this.state;
 
     if (isLoading)
       return (
@@ -66,8 +72,8 @@ class Recipe extends Component<any, RecipeState> {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            bgcolor: 'rgba(255, 255, 255, 0.7)', 
-            zIndex: 9999, 
+            bgcolor: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 9999,
           }}
         >
           <CircularProgress size={60} color="primary" />
@@ -76,10 +82,12 @@ class Recipe extends Component<any, RecipeState> {
 
     if (!meal)
       return (
-        <Typography sx={{ mt: 10, textAlign: 'center' }}>
-          Recipe not found.
-        </Typography>
+        <Typography sx={{ mt: 10, textAlign: 'center' }}>Recipe not found.</Typography>
       );
+
+    const instructions = meal.strInstructions || '';
+    const truncatedInstructions =
+      instructions.length > 300 ? instructions.slice(0, 300) + '...' : instructions;
 
     return (
       <Box
@@ -91,11 +99,26 @@ class Recipe extends Component<any, RecipeState> {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          bgcolor: '#D4DE95',
           overflowX: 'hidden',
           boxSizing: 'border-box',
         }}
       >
+        <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url('/b1.jpeg')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    opacity: 0.3,
+                    filter: 'blur(2px)',
+                    zIndex: -1,
+                  }}
+                />
         <Toolbar />
 
         <Typography
@@ -141,8 +164,17 @@ class Recipe extends Component<any, RecipeState> {
             Instructions
           </Typography>
           <Typography sx={{ color: '#3D4127', lineHeight: 1.6 }}>
-            {meal.strInstructions}
+            {showFullInstructions ? instructions : truncatedInstructions}
           </Typography>
+
+          {instructions.length > 300 && (
+            <Button
+              onClick={this.toggleInstructions}
+              sx={{ mt: 1, textTransform: 'none' }}
+            >
+              {showFullInstructions ? 'See Less' : 'See More'}
+            </Button>
+          )}  
         </Paper>
       </Box>
     );
