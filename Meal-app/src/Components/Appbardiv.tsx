@@ -32,7 +32,7 @@ interface Props {
   navigate: (path: string | number) => void;
   location: any;
   params: any;
-  favorites: any[]; // Pass the full favorites array
+  favorites: any[]; 
 }
 
 interface State {
