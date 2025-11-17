@@ -122,6 +122,7 @@ class App extends Component<{}, AppState> {
       addFavorite={this.addFavorite}
       removeFavorite={this.removeFavorite}
       favorites={favorites}
+      loggedIn={loggedIn}
     />
   }
 />

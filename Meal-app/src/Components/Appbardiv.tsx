@@ -32,7 +32,7 @@ interface Props {
   navigate: (path: string | number) => void;
   location: any;
   params: any;
-  favorites: any[]; 
+  favorites: any[];
 }
 
 interface State {
@@ -44,7 +44,7 @@ interface State {
 }
 
 class Appbardiv extends Component<Props, State> {
-  searchTimer: any = null;
+  debouncedSearch: any = null;
 
   state: State = {
     drawerOpen: false,
@@ -54,12 +54,32 @@ class Appbardiv extends Component<Props, State> {
     isLoading: false,
   };
 
+  debounce(fn: any, delay: number) {
+    let timer: any;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.updateMobileState);
+    this.debouncedSearch = this.debounce((query: string) => {
+      this.fetchMeals(query);
+    }, 500);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateMobileState);
+  }
+
   toggleDrawer = (open: boolean) => () => {
     this.setState({ drawerOpen: open });
   };
 
   navigateTo = (path: string | number) => {
     this.props.navigate(path);
+    window.scrollTo(0, 0);
     this.setState({ drawerOpen: false, searchQuery: '', meals: [] });
   };
 
@@ -76,29 +96,17 @@ class Appbardiv extends Component<Props, State> {
     this.setState({ isMobile: window.innerWidth < 600 });
   };
 
-  componentDidMount() {
-    window.addEventListener('resize', this.updateMobileState);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.updateMobileState);
-  }
 
   handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    this.setState({ searchQuery: query });
-
-    clearTimeout(this.searchTimer);
-    if (query.trim().length >= 3) {
-      this.searchTimer = setTimeout(() => {
-        this.fetchMeals(query.trim());
-      }, 500);
-    } else {
-      this.setState({ meals: [] });
-    }
+    this.setState({
+      searchQuery: event.target.value,
+      meals: [],
+    });
   };
 
   fetchMeals = async (query: string) => {
+    if (!query || query.length < 1) return; 
+
     this.setState({ isLoading: true });
 
     const apiUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(
@@ -127,7 +135,7 @@ class Appbardiv extends Component<Props, State> {
 
   render() {
     const { drawerOpen, searchQuery, meals, isMobile, isLoading } = this.state;
-    const { loggedIn, favorites } = this.props;
+    const { loggedIn } = this.props;
 
     const menuItems = [
       { text: 'Home', icon: <HomeIcon />, path: '/' },
@@ -144,33 +152,15 @@ class Appbardiv extends Component<Props, State> {
     return (
       <Box>
         <AppBar sx={{ position: 'fixed', bgcolor: '#3D4127' }}>
-          <Toolbar
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              py: { xs: 1.5, sm: 1 },
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               {this.showBackButton() ? (
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="back"
-                  onClick={this.handleBack}
-                  sx={{ mr: 1 }}
-                >
+                <IconButton color="inherit" onClick={this.handleBack}>
                   <ArrowBackIcon />
                 </IconButton>
               ) : (
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  sx={{ mr: 1 }}
-                  onClick={this.toggleDrawer(true)}
-                >
+                <IconButton color="inherit" onClick={this.toggleDrawer(true)}>
                   <MenuIcon />
                 </IconButton>
               )}
@@ -181,34 +171,26 @@ class Appbardiv extends Component<Props, State> {
                   alt="logo"
                   style={{ height: '50px', width: '50px', borderRadius: '50%' }}
                 />
-                <Typography variant="h6" sx={{ marginLeft: '8px', fontWeight: 500 }}>
+                <Typography variant="h6" sx={{ ml: 1 }}>
                   Meal Mate
                 </Typography>
               </Box>
             </Box>
 
-            <Box
-              sx={{
-                flex: isMobile ? '1 1 100%' : '0 1 400px',
-                display: 'flex',
-                justifyContent: 'center',
-                mt: isMobile ? 1 : 0,
-                position: 'relative',
-              }}
-            >
+         
+            <Box sx={{ flex: isMobile ? '1 1 100%' : '0 1 400px', position: 'relative' }}>
               <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   backgroundColor: '#BAC095',
                   borderRadius: '4px',
-                  padding: '0 8px',
-                  width: '100%',
+                  px: 1,
                 }}
               >
                 <input
                   type="text"
-                  placeholder="Search "
+                  placeholder="Search"
                   value={searchQuery}
                   onChange={this.handleSearchChange}
                   style={{
@@ -219,19 +201,11 @@ class Appbardiv extends Component<Props, State> {
                     padding: '8px',
                   }}
                 />
-                {isLoading ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <IconButton
-                    sx={{ p: '5px' }}
-                    aria-label="search"
-                    onClick={() =>
-                      searchQuery.trim().length >= 3 && this.fetchMeals(searchQuery.trim())
-                    }
-                  >
-                    <SearchIcon />
-                  </IconButton>
-                )}
+
+            
+                <IconButton onClick={() => this.debouncedSearch(searchQuery.trim())}>
+                  {isLoading ? <CircularProgress size={20} /> : <SearchIcon />}
+                </IconButton>
               </Box>
 
               {searchQuery && (
@@ -244,14 +218,9 @@ class Appbardiv extends Component<Props, State> {
                     maxHeight: 300,
                     overflowY: 'auto',
                     zIndex: 1200,
-                    boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
                   }}
                 >
-                  {isLoading ? (
-                    <ListItemButton>
-                      <ListItemText primary="Loading..." />
-                    </ListItemButton>
-                  ) : meals.length > 0 ? (
+                  {meals.length > 0 ? (
                     meals.map((meal) => (
                       <ListItemButton
                         key={meal.idMeal}
@@ -270,33 +239,30 @@ class Appbardiv extends Component<Props, State> {
             </Box>
 
             {!isMobile && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 2 }}>
                 <IconButton color="inherit" onClick={() => this.navigateTo('/favorites')}>
                   <Badge badgeContent={this.props.favorites.length} color="error">
-                    <FavoriteIcon sx={{ color: 'white' }} />
+                    <FavoriteIcon />
                   </Badge>
                 </IconButton>
 
                 <Button color="inherit" onClick={() => this.navigateTo('/filter')}>
-                  <FilterAltIcon sx={{ color: 'white' }} />
+                  <FilterAltIcon />
                 </Button>
-                <Button color="inherit" onClick={() => this.navigateTo('/')}>
-                  Home
-                </Button>
+
+                <Button color="inherit" onClick={() => this.navigateTo('/')}>Home</Button>
+
                 {loggedIn ? (
-                  <Button color="inherit" onClick={this.handleLogout}>
-                    Logout
-                  </Button>
+                  <Button color="inherit" onClick={this.handleLogout}>Logout</Button>
                 ) : (
-                  <Button color="inherit" onClick={() => this.navigateTo('/login')}>
-                    Login
-                  </Button>
+                  <Button color="inherit" onClick={() => this.navigateTo('/login')}>Login</Button>
                 )}
               </Box>
             )}
           </Toolbar>
         </AppBar>
 
+      
         <Drawer
           open={drawerOpen}
           onClose={this.toggleDrawer(false)}
@@ -309,25 +275,20 @@ class Appbardiv extends Component<Props, State> {
             },
           }}
         >
-          <Box sx={{ width: { xs: 200, sm: 250 } }}>
-            <List>
-              {menuItems.map((item) => (
-                <ListItemButton
-                  key={item.text}
-                  onClick={() => {
-                    if (item.text === 'Logout') {
-                      this.handleLogout();
-                    } else {
-                      this.navigateTo(item.path);
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ color: '#ebece3ff' }}>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              ))}
-            </List>
-          </Box>
+          <List>
+            {menuItems.map((item) => (
+              <ListItemButton
+                key={item.text}
+                onClick={() => {
+                  if (item.text === 'Logout') this.handleLogout();
+                  else this.navigateTo(item.path);
+                }}
+              >
+                <ListItemIcon sx={{ color: '#fff' }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            ))}
+          </List>
         </Drawer>
       </Box>
     );

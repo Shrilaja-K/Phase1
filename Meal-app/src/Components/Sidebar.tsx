@@ -7,7 +7,6 @@ import { withRouter } from './withRouter';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
-
 class Sidebar extends Component {
   render() {
     const { open, toggleDrawer } = this.props; 

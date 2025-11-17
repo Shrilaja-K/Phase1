@@ -11,8 +11,9 @@ interface Meal {
 
 interface Props {
   navigate: (path: string) => void;
-  favorites: Meal[];  
+  favorites: Meal[];
   removeFavorite: (id: string) => void;
+  loggedIn: boolean;
 }
 
 class Favorites extends Component<Props> {

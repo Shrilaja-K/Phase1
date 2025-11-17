@@ -77,13 +77,20 @@ class FilterPage extends Component<any, FilterPageState> {
     return this.props.favorites.some((m: Meal) => m.idMeal === idMeal);
   };
 
+
   toggleFavorite = (meal: Meal) => {
+    if (!this.props.loggedIn) {
+      this.props.navigate('/login');
+      return;
+    }
+
     if (this.isFavorite(meal.idMeal)) {
       this.props.removeFavorite(meal.idMeal);
     } else {
       this.props.addFavorite(meal);
     }
   };
+
 
   handleFilter = async () => {
     const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
@@ -94,7 +101,7 @@ class FilterPage extends Component<any, FilterPageState> {
       ingredient: selectedIngredient,
     };
 
-  
+
     if (
       lastFilters &&
       lastFilters.category === currentFilters.category &&
@@ -126,6 +133,7 @@ class FilterPage extends Component<any, FilterPageState> {
 
   handlePageChange = (_event: any, value: number) => {
     this.setState({ currentPage: value });
+    window.scrollTo(0, 0);
   };
 
   render() {
@@ -196,6 +204,7 @@ class FilterPage extends Component<any, FilterPageState> {
                 backgroundColor: '#fff',
                 width: '100%',
                 borderRadius: 0,
+                
               }}
             >
               <Autocomplete
