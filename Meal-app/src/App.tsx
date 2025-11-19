@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { lazy,Suspense,Component } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Appbardiv from './Components/Appbardiv';
@@ -12,9 +12,28 @@ import ContactUs from './Components/ContactUs';
 import Sweets from './Components/Sweets';
 import ProtectedRoute from './Components/ProtectedRoute';
 import Recipe from './Components/Recipe';
-import Filter from './Components/Filter';
+// import Filter from './Components/Filter';
 import ErrorBoundary from './Components/Errorboundary';
 import Favorites from './Components/Favorites';
+import { connect } from 'react-redux';
+import type { RootState } from './Components/store';
+
+const Filter = lazy(() => 
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(import('./Components/Filter'));
+    },3000);
+  })
+);
+
+const mapStateToProps = (state: RootState) => ({
+  loggedIn: state.auth.loggedIn,
+  username: state.auth.username,
+  email: state.auth.email,
+});
+
+
+
 
 interface Meal {
   idMeal: string;
@@ -23,7 +42,7 @@ interface Meal {
 }
 
 interface AppState {
-  loggedIn: boolean;
+  // loggedIn: boolean;
   username: string;
   email: string;
   favorites: Meal[];
@@ -31,7 +50,7 @@ interface AppState {
 
 class App extends Component<{}, AppState> {
   state: AppState = {
-    loggedIn: false,
+    // loggedIn: false,
     username: '',
     email: '',
     favorites: this.loadFavorites(),
@@ -80,13 +99,13 @@ class App extends Component<{}, AppState> {
     return (
       <Router>
         <Appbardiv
-  loggedIn={loggedIn}
-  username={username}
+  loggedIn={this.props.loggedIn}
+  username={this.props.username}
   onLogout={this.handleLogout}
   favorites={favorites}
 />
 
-
+      <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route
             path="/"
@@ -115,6 +134,7 @@ class App extends Component<{}, AppState> {
           <Route path="/login" element={<Login onLogin={this.handleLogin} />} />
           <Route path="/signup" element={<SignUp onSignUp={this.handleLogin} />} />
           <Route path="/recipe/:id" element={<Recipe />} />
+          
           <Route
   path="/filter"
   element={
@@ -126,20 +146,38 @@ class App extends Component<{}, AppState> {
     />
   }
 />
+          
 
-          <Route
-            path="/favorites"
-            element={
-              <ProtectedRoute loggedIn={loggedIn}>
-                <Favorites favorites={favorites} removeFavorite={this.removeFavorite} />
-              </ProtectedRoute>
-            }
-          />
+         
+  <Route
+    path="/favorites"
+    element={
+      <ProtectedRoute loggedIn={this.props.loggedIn}>
+        <Favorites favorites={favorites} removeFavorite={this.removeFavorite} />
+      </ProtectedRoute>
+    }
+  />
+
           <Route path="*" element={<ErrorBoundary />} />
         </Routes>
+        </Suspense>
       </Router>
     );
   }
 }
 
-export default App;
+export default connect(mapStateToProps)(App);
+
+// import React from 'react'
+// import Hook from './Components/Hook'
+
+// function App() {
+//   return (
+//     <div>
+//       <Hook />
+//     </div>
+//   )
+// }
+
+// export default App
+

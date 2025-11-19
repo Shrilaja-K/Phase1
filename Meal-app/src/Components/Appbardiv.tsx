@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import type { RootState } from './store';
+import { logout } from './authSlice';
+
 import {
   Box,
   Button,
@@ -295,4 +299,15 @@ class Appbardiv extends Component<Props, State> {
   }
 }
 
-export default withRouter(Appbardiv);
+const mapStateToProps = (state: RootState) => ({
+  loggedIn: state.auth.loggedIn,
+  username: state.auth.username,
+  favorites: state.favorites.items,
+});
+
+const mapDispatchToProps = (dispatch: any) => ({
+  onLogout: () => dispatch(logout()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Appbardiv));
+

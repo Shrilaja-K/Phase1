@@ -15,6 +15,9 @@ import CategoryIcon from '@mui/icons-material/Category';
 import PublicIcon from '@mui/icons-material/Public';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import { connect } from 'react-redux';
+import type { RootState } from './store';
+import { addFavorite, removeFavorite } from './favoritesSlice';
 
 const APPBAR_HEIGHT = 80;
 
@@ -36,7 +39,14 @@ interface FilterPageState {
   lastFilters: any;
 }
 
-class FilterPage extends Component<any, FilterPageState> {
+interface ReduxProps {
+  favorites: Meal[];
+  loggedIn: boolean;
+  addFavorite: (meal: Meal) => void;
+  removeFavorite: (idMeal: string) => void;
+}
+
+class FilterPage extends Component<ReduxProps , FilterPageState> {
   state: FilterPageState = {
     categories: [],
     areas: [],
@@ -77,7 +87,6 @@ class FilterPage extends Component<any, FilterPageState> {
     return this.props.favorites.some((m: Meal) => m.idMeal === idMeal);
   };
 
-
   toggleFavorite = (meal: Meal) => {
     if (!this.props.loggedIn) {
       this.props.navigate('/login');
@@ -91,7 +100,6 @@ class FilterPage extends Component<any, FilterPageState> {
     }
   };
 
-
   handleFilter = async () => {
     const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
 
@@ -100,7 +108,6 @@ class FilterPage extends Component<any, FilterPageState> {
       area: selectedArea,
       ingredient: selectedIngredient,
     };
-
 
     if (
       lastFilters &&
@@ -204,7 +211,6 @@ class FilterPage extends Component<any, FilterPageState> {
                 backgroundColor: '#fff',
                 width: '100%',
                 borderRadius: 0,
-                
               }}
             >
               <Autocomplete
@@ -407,4 +413,17 @@ class FilterPage extends Component<any, FilterPageState> {
   }
 }
 
-export default withRouter(FilterPage);
+const mapStateToProps = (state: RootState) => ({
+  favorites: state.favorites.items,
+  loggedIn: state.auth.loggedIn,
+});
+
+const mapDispatchToProps = {
+  addFavorite,
+  removeFavorite,
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withRouter(FilterPage));
