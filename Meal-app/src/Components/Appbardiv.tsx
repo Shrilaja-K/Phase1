@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import type { RootState } from './store';
-import { logout } from './authSlice';
+import type { RootState } from '../redux/store';
+import { logout } from '../redux/actions';
 
 import {
   Box,

@@ -16,8 +16,9 @@ import PublicIcon from '@mui/icons-material/Public';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { connect } from 'react-redux';
-import type { RootState } from './store';
-import { addFavorite, removeFavorite } from './favoritesSlice';
+import type { RootState } from '../redux/store';
+import { addFavorite, removeFavorite } from '../redux/favactions';
+import { fetchDesserts } from '../redux/dessertsactions'; 
 
 const APPBAR_HEIGHT = 80;
 
@@ -39,11 +40,16 @@ interface FilterPageState {
   lastFilters: any;
 }
 
+
 interface ReduxProps {
   favorites: Meal[];
   loggedIn: boolean;
   addFavorite: (meal: Meal) => void;
   removeFavorite: (idMeal: string) => void;
+  desserts: Meal[];
+  dessertsLoading: boolean;
+  fetchDesserts: () => Promise;
+  navigate: (path: string) => void; 
 }
 
 class FilterPage extends Component<ReduxProps , FilterPageState> {
@@ -101,7 +107,15 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
   };
 
   handleFilter = async () => {
-    const { selectedCategory, selectedArea, selectedIngredient, lastFilters } = this.state;
+    const { 
+        selectedCategory, 
+        selectedArea, 
+        selectedIngredient, 
+        lastFilters 
+    } = this.state;
+    
+
+    const { desserts, fetchDesserts } = this.props;
 
     const currentFilters = {
       category: selectedCategory,
@@ -109,14 +123,33 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
       ingredient: selectedIngredient,
     };
 
+ 
     if (
       lastFilters &&
       lastFilters.category === currentFilters.category &&
       lastFilters.area === currentFilters.area &&
       lastFilters.ingredient === currentFilters.ingredient
     ) {
-      return;
+
+      return; 
     }
+
+    if (
+        selectedCategory === 'Dessert' &&
+        !selectedArea && 
+        !selectedIngredient 
+    ) {
+        if (desserts.length > 0) {
+            
+            this.setState({
+                meals: desserts,
+                currentPage: 1,
+                lastFilters: currentFilters,
+            });
+            return;
+        } 
+    }
+ 
 
     let url = 'https://www.themealdb.com/api/json/v1/1/filter.php?';
     if (selectedCategory) url += `c=${selectedCategory}&`;
@@ -127,11 +160,17 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
     try {
       const res = await fetch(url);
       const data = await res.json();
+      let mealsToSet = data.meals || [];
+      if (selectedCategory === 'Dessert' && !selectedArea && !selectedIngredient && this.props.desserts.length > 0) {
+        mealsToSet = this.props.desserts;
+      }
+      
       this.setState({
-        meals: data.meals || [],
+        meals: mealsToSet,
         currentPage: 1,
         lastFilters: currentFilters,
       });
+      
     } catch (error) {
       console.error(error);
       this.setState({ meals: [], currentPage: 1, lastFilters: currentFilters });
@@ -144,6 +183,7 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
   };
 
   render() {
+ 
     const {
       categories,
       areas,
@@ -416,14 +456,17 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
 const mapStateToProps = (state: RootState) => ({
   favorites: state.favorites.items,
   loggedIn: state.auth.loggedIn,
+  desserts: state.desserts.desserts,
+  dessertsLoading: state.desserts.loading,
 });
 
 const mapDispatchToProps = {
   addFavorite,
   removeFavorite,
+  fetchDesserts, 
 };
 
 export default connect(
-  mapStateToProps,
+  mapStateToProps,   
   mapDispatchToProps
 )(withRouter(FilterPage));

@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { login } from './authSlice';
+import { login } from '../redux/actions';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from './AuthForm';
 

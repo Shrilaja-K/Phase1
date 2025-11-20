@@ -16,7 +16,7 @@ import Recipe from './Components/Recipe';
 import ErrorBoundary from './Components/Errorboundary';
 import Favorites from './Components/Favorites';
 import { connect } from 'react-redux';
-import type { RootState } from './Components/store';
+import type { RootState } from './redux/store';
 
 const Filter = lazy(() => 
   new Promise((resolve) => {

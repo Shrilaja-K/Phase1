@@ -2,8 +2,8 @@
   import { Box, Grid, Paper, Typography, IconButton, Toolbar } from '@mui/material';
   import FavoriteIcon from '@mui/icons-material/Favorite';
   import { connect } from 'react-redux';
-  import type { RootState } from './store';
-  import { removeFavorite } from './favoritesSlice';
+  import type { RootState } from '../redux/store';
+  import { removeFavorite } from '../redux/favactions';
   import { withRouter } from './withRouter';
 
   interface Meal {
