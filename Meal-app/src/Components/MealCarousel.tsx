@@ -1,5 +1,9 @@
 import React, { Component, createRef } from 'react';
 import { Box, Typography } from '@mui/material';
+import { withRouter } from './withRouter';
+import { connect } from 'react-redux';
+import { fetchDesserts } from '../redux/dessertsactions';
+import type { RootState } from '../redux/store';
 
 interface Meal {
   idMeal: string;
@@ -12,11 +16,14 @@ interface Props {
   apiUrl: string;
   loadingText?: string;
   navigate: (path: string) => void;
+  desserts: Meal[];
+    dessertsLoading: boolean;
+    fetchDesserts: () => Promise;
 }
 
-interface State {
-  meals: Meal[];
-}
+// interface State {
+//   meals: Meal[];
+// }
 
 class MealCarousel extends Component<Props, State> {
   state: State = { meals: [] };
@@ -25,6 +32,12 @@ class MealCarousel extends Component<Props, State> {
   animationId: number | null = null;
 
   async componentDidMount() {
+    
+    if(this.props.apiUrl=="https://www.themealdb.com/api/json/v1/1/filter.php?c=Dessert"){
+      this.props.fetchDesserts();
+      console.log("Fetched Desserts");
+    } 
+  console.log("Mounted Carousel");
     try {
       const res = await fetch(this.props.apiUrl);
       const data = await res.json();
@@ -114,4 +127,14 @@ class MealCarousel extends Component<Props, State> {
   }
 }
 
-export default MealCarousel;
+const mapStateToProps = (state: RootState) => ({
+  desserts: state.desserts.desserts,
+  dessertsLoading: state.desserts.loading,
+});
+
+const mapDispatchToProps = {
+  fetchDesserts, 
+};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(MealCarousel));
+// export default MealCarousel;

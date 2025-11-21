@@ -161,7 +161,9 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
       const res = await fetch(url);
       const data = await res.json();
       let mealsToSet = data.meals || [];
+
       if (selectedCategory === 'Dessert' && !selectedArea && !selectedIngredient && this.props.desserts.length > 0) {
+       
         mealsToSet = this.props.desserts;
       }
       
@@ -456,6 +458,7 @@ class FilterPage extends Component<ReduxProps , FilterPageState> {
 const mapStateToProps = (state: RootState) => ({
   favorites: state.favorites.items,
   loggedIn: state.auth.loggedIn,
+
   desserts: state.desserts.desserts,
   dessertsLoading: state.desserts.loading,
 });

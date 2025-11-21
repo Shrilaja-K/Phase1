@@ -27,9 +27,8 @@ class Sweets extends Component<any, any> {
     return (
       <MealCarousel
         title="Sugar Rush"
-        meals={desserts} 
+        meals={dessertsData.desserts} 
         navigate={navigate}
-       
       />
     );
   }
