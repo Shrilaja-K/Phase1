@@ -21,10 +21,20 @@ describe('Authform',()=>{
         });
         expect(buttonelement2).toBeInTheDocument();
     })
-    test('placeholder check',()=>{
+    test('placeholder checks',()=>{
         render(<AuthForm/>)
         const placecheck=screen.getByPlaceholderText('Enter your email');
         expect(placecheck).toBeInTheDocument();
+    })
+    test('text check',()=>{
+        render(<AuthForm/>)
+        const textelement=screen.getByText("Login");
+        expect(textelement).toBeInTheDocument();
+    })
+    test('title check',()=>{
+        render(<AuthForm/>)
+        const titleelement=screen.getByTitle("close");
+        expect(titleelement).toBeInTheDocument();
     })
     
 

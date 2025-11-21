@@ -154,6 +154,7 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
             )}
           </Typography>
         </Paper>
+        <span title='close'>X</span>
       </Box>
     );
   }
