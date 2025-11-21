@@ -106,6 +106,7 @@ export default class AuthForm extends Component<AuthFormProps, AuthFormState> {
               fullWidth
               label="Email"
               name="email"
+              placeholder='Enter your email'
               value={email}
               onChange={this.handleChange}
               error={!!errors.email}
