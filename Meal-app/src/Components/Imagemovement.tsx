@@ -5,7 +5,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { withRouter } from './withRouter';
 import MealCard from './MealCard';
 
-class ImageMovement extends Component<any, any> {
+class ImageMovement extends Component{
   state = {
     meals: [],
     currentIndex: 0,

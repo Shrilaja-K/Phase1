@@ -64,9 +64,9 @@ export default class VideoSection extends Component {
           <Typography variant="h3" sx={{ fontWeight: 600 ,fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' }}}>
             Discover Delicious Meals Worldwide
           </Typography>
-          <Typography variant="h6" sx={{ mt: 2 ,fontSize: { xs: '0.9rem', sm: '1.2rem', md: '1.5rem' },}}>
+          <p variant="h6" sx={{ mt: 2 ,fontSize: { xs: '0.9rem', sm: '1.2rem', md: '1.5rem' },}}>
             Explore thousands of recipes and find your next favorite dish!
-          </Typography>
+          </p>
         </Box>
       </Box>
     );

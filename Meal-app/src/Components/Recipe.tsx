@@ -29,7 +29,7 @@ class Recipe extends Component<any, RecipeState> {
     if (id) this.fetchMeal(id);
   }
 
-  componentDidUpdate(prevProps: any) {
+  componentDidUpdate(prevProps) {
     const prevId = prevProps.params.id;
     const currentId = this.props.params.id;
 

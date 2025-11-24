@@ -1,5 +1,4 @@
 
-import App from "../App"
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import Footer from '../Components/Footer'; 
@@ -12,11 +11,11 @@ test('Footer', () =>  {
     expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
 
-test('Footer', () =>  {
-    render(<Footer />);
+// test('Footer', () =>  {
+//     render(<Footer />);
 
-    const currentYear = new Date().getFullYear();
-    const expectedText = `© ${currentYear}  Mate. All rights reserved.`;
-    expect(screen.getByText(expectedText)).toBeInTheDocument();
-  });
+//     const currentYear = new Date().getFullYear();
+//     const expectedText = `© ${currentYear}  Mate. All rights reserved.`;
+//     expect(screen.getByText(expectedText)).toBeInTheDocument();
+//   });
 })

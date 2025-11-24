@@ -11,7 +11,7 @@ const Login: React.FC = () => {
     dispatch(login({ username, email }));
     navigate('/');
   };
-
+  
   return <AuthForm mode="login" onAuthSuccess={handleLogin} navigate={navigate} />;
 };
 export default Login;
