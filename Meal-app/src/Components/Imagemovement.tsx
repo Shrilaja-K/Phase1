@@ -4,6 +4,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { withRouter } from './withRouter';
 import MealCard from './MealCard';
+import axios from 'axios'; 
 
 class ImageMovement extends Component{
   state = {
@@ -22,8 +23,8 @@ class ImageMovement extends Component{
   fetchMeals = async (count: number) => {
     const meals = [];
     for (let i = 0; i < count; i++) {
-      const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
-      const data = await res.json();
+      const res = await axios.get('https://www.themealdb.com/api/json/v1/1/random.php');
+      const data =  res.data;
       meals.push(data.meals[0]);
     }
     this.setState({ meals }, () => {

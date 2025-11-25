@@ -27,21 +27,22 @@
 
     // vite.config.ts
     /// <reference types="vitest" />
+    
     import { defineConfig } from 'vite';
     import react from '@vitejs/plugin-react';
 
     export default defineConfig({
       plugins: [react()],
-      test: {
-        globals: true,
-        environment: 'jsdom', // Or 'happy-dom'
-        setupFiles: ['./vitest.setup.ts'], // Optional: for global setup like jest-dom
-        coverage: {
-          enabled: true, // Enable coverage collection
-          reporter: ['text', 'json', 'html'], // Choose your desired reporters
-          include: ['src/**/*.{ts,tsx,js,jsx}'], // Specify files to include in coverage
-          exclude: ['node_modules/', 'dist/', '.idea/', '.git/', '.vscode/', 'coverage/'], // Exclude files/folders
-        },
-      },
+      // test: {
+      //   globals: true,
+      //   environment: 'jsdom', // Or 'happy-dom'
+      //   setupFiles: ['./vitest.setup.ts'], // Optional: for global setup like jest-dom
+      //   coverage: {
+      //     enabled: true, // Enable coverage collection
+      //     reporter: ['text', 'json', 'html'], // Choose your desired reporters
+      //     include: ['src/**/*.{ts,tsx,js,jsx}'], // Specify files to include in coverage
+      //     exclude: ['node_modules/', 'dist/', '.idea/', '.git/', '.vscode/', 'coverage/'], // Exclude files/folders
+      //   },
+      // },
     });
 

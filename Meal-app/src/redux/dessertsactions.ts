@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   FETCH_DESSERTS_REQUEST,
   FETCH_DESSERTS_SUCCESS,
@@ -21,12 +22,11 @@ export const fetchDessertsFailure = (error) => ({
 
 export const fetchDesserts = () => {
   return async (dispatch, getState) => {
-    const state = getState();
    
     dispatch(fetchDessertsRequest());
     try {
-      const response = await fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Dessert');
-      const data = await response.json();
+      const response = await axios.get('https://www.themealdb.com/api/json/v1/1/filter.php?c=Dessert');
+      const data = response.data;
       const desserts = data.meals || [];
       dispatch(fetchDessertsSuccess(desserts));
     } catch (error) {

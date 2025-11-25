@@ -1,9 +1,26 @@
-import { testbox } from '@mui/material'
 import AuthForm from '../Components/AuthForm'
-import {render,screen} from '@testing-library/react'
+import {render,screen,waitFor} from '@testing-library/react'
 import user from '@testing-library/user-event'
 
+const mockNavigate = jest.fn();
+const mockOnAuthSuccess = jest.fn();
+
+jest.mock('../Components/withRouter', () => ({
+  withRouter: (Component) => (props) => (
+    <Component 
+      {...props} 
+      navigate={mockNavigate} 
+      onAuthSuccess={mockOnAuthSuccess} 
+    />
+  ),
+}));
+
 describe('Authform',()=>{
+
+     beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('rendering 1st',()=>{
         render(<AuthForm/>)
         const inputelement=screen.getByRole('textbox');
@@ -62,5 +79,44 @@ describe('Authform',()=>{
         await user.tab();
         expect(submitButton2).toHaveFocus();
     })
+
+    test("snapshot",() => {
+        expect(render(<AuthForm/>)).toMatchSnapshot();
+    })
+
+    test('Sign up', () => {
+        render(<AuthForm mode="login" />);
+        const signUpLink = screen.getByRole('button', { name: /Sign Up/i });
+        expect(signUpLink).toBeInTheDocument();
+    });
+
+    test('validation', async () => {
+        user.setup();
+        render(<AuthForm mode="login" />);
+        const submitButton = screen.getByRole('button', { name: /Login/i });
+        await user.click(submitButton);
+        await waitFor(() => {
+            expect(screen.getByText(/Email is required/i)).toBeInTheDocument();
+            expect(screen.getByText(/Password is required/i)).toBeInTheDocument();
+        });
+        expect(mockOnAuthSuccess).not.toHaveBeenCalled();
+    });
+
+
+    test('password length', async () => {
+        user.setup();
+        render(<AuthForm mode="signup" />);
+        
+        const passwordInput = screen.getByLabelText(/Password/i);
+        const submitButton = screen.getByRole('button', { name: /Sign Up/i });
+
+        await user.type(passwordInput, '12345'); 
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(screen.getByText(/Password must be at least 6 characters/i)).toBeInTheDocument();
+        });
+        expect(mockOnAuthSuccess).not.toHaveBeenCalled();
+    });
 
 })
